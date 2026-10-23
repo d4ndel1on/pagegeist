@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Pagegeist</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a5fd0"/>
+      <stop offset="1" stop-color="#4b3274"/>
+    </linearGradient>
+    <clipPath id="tile"><rect width="64" height="64" rx="14"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="64" height="64" fill="url(#bg)"/>
+    <!-- long black hair -->
+    <path d="M10 64V31C10 15 19 6 32 6s22 9 22 25v33z" fill="#0f0d12"/>
+    <!-- face -->
+    <ellipse cx="32" cy="38" rx="14" ry="16" fill="#f7ece6"/>
+    <!-- blunt bangs and side locks -->
+    <path d="M17 64V28C17 18 23 13 32 13s15 5 15 15v36h-4V29H21v35z" fill="#0f0d12"/>
+    <!-- half-lidded, unimpressed eyes looking aside -->
+    <path d="M24 37.5h6a3 3 0 0 1-6 0zM34 37.5h6a3 3 0 0 1-6 0z" fill="#2d2329"/>
+    <path d="M26.5 37.5h3.5a2 2 0 0 1-3.5 1.2zM36.5 37.5h3.5a2 2 0 0 1-3.5 1.2z" fill="#0b090e"/>
+    <path d="M23.2 37.2h7.4M33.2 37.2h7.4" stroke="#0b090e" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- pout -->
+    <path d="M29.5 47q2.5 1.4 5 0" stroke="#8e1b2b" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
