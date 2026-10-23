@@ -38,6 +38,3 @@ jobs:
           publish-script: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Temporary: only for the very first publish, before the trusted publisher exists.
-          # Remove this line and the NPM_TOKEN secret afterwards.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
