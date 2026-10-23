@@ -1,0 +1,113 @@
+{
+  "name": "@d4ndel1on/pagegeist",
+  "version": "0.0.0",
+  "description": "A bratty gothic poltergeist that haunts your web page: she walks on your headings, sits on your buttons, hangs from edges and climbs your text – mostly to annoy you. Zero dependencies, React adapter included.",
+  "keywords": [
+    "mascot",
+    "react",
+    "canvas",
+    "overlay",
+    "animation",
+    "character",
+    "easter-egg",
+    "goth",
+    "desktop-pet",
+    "poltergeist",
+    "ghost"
+  ],
+  "license": "(MIT AND CC0-1.0)",
+  "author": "d4ndel1on",
+  "homepage": "https://github.com/d4ndel1on/pagegeist#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d4ndel1on/pagegeist.git"
+  },
+  "bugs": "https://github.com/d4ndel1on/pagegeist/issues",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "LICENSE-ARTWORK"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsdown",
+    "build:playground": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check:package": "npm run check:dist && publint && attw --pack . --profile esm-only",
+    "check:dist": "node scripts/check-dist.mjs",
+    "size": "size-limit",
+    "ci": "npm run lint && npm run typecheck && npm run test && npm run build && npm run check:package && npm run size && npm run build:playground",
+    "changeset": "changeset",
+    "release": "npm run build && changeset publish"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@biomejs/biome": "2.6.2",
+    "@changesets/cli": "3.0.3",
+    "@size-limit/preset-small-lib": "14.3.0",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/react": "16.3.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "@vitest/coverage-v8": "5.0.5",
+    "happy-dom": "21.0.4",
+    "publint": "0.3.25",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "size-limit": "14.3.0",
+    "tsdown": "0.23.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "size-limit": [
+    {
+      "name": "core (vanilla)",
+      "path": "dist/index.js",
+      "import": "{ createPagegeist }",
+      "limit": "24.25 kB"
+    },
+    {
+      "name": "react adapter",
+      "path": "dist/react.js",
+      "import": "{ Pagegeist }",
+      "ignore": [
+        "react"
+      ],
+      "limit": "24.75 kB"
+    }
+  ]
+}

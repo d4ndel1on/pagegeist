@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-playground/
+coverage/
+*.tgz
+.DS_Store
+.idea/
+# Original prototype, kept locally for reference only
+_prototype/
+.claude/

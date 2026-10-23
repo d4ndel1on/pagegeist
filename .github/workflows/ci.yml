@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Superseded PR runs are cancelled; runs on main always finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        react: ['18', '19']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # No dependency needs install scripts on Linux (only the macOS-only fsevents has one).
+      - run: npm ci --ignore-scripts
+      - name: Use React ${{ matrix.react }}
+        if: matrix.react == '18'
+        run: npm install --no-save --ignore-scripts react@18 react-dom@18 @types/react@18 @types/react-dom@18
+      - run: npm run lint
+      - run: npm run typecheck
+        if: matrix.react == '19'
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:package
+      - run: npm run size
+      - run: npm run build:playground
+      - run: npm audit --omit=dev --audit-level=moderate
