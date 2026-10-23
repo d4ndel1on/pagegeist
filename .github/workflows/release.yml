@@ -28,8 +28,6 @@ jobs:
       - run: npm ci --ignore-scripts
       # Full gate: lint, typecheck, tests, build, package checks, size budget, playground build.
       - run: npm run ci
-      # Temporary: show why the npm OIDC token exchange fails. Dry run – publishes nothing.
-      - run: npm publish --dry-run --loglevel silly 2>&1 | grep -iE 'oidc|npm:registry' || true
       # Opens a "Version packages" PR while changesets are pending; publishes once it is merged.
       # Publishing uses npm trusted publishing – no NPM_TOKEN secret needed once the package
       # is linked to this repository/workflow on npmjs.com (see CONTRIBUTING.md › Releases).
