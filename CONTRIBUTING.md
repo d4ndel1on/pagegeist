@@ -36,10 +36,12 @@ npm run changeset  # describe user-facing changes (skip for docs/internal-only c
 ## Size budget
 
 `size-limit` (configured in `package.json`, min+brotli incl. all dependencies) caps the
-bundles at **24.25 kB** for the core and **24.75 kB** for the React adapter.
+bundles at **24.5 kB** for the core and **24.75 kB** for the React adapter.
 
 History:
 
+- **24.25 kB → 24.5 kB** core only (approved by the repo owner; measured 24.26 kB /
+  24.63 kB). The growth is the 16 owner-requested built-in phrases added in 0.1.1.
 - **23.75 kB / 24 kB → 24.25 kB / 24.75 kB** (approved by the repo owner; measured
   23.98 kB / 24.38 kB). The growth comes from the owner-requested pose-dependent hands
   (palm, fingers and thumb; relaxed, grip, open and flat poses) and the redrawn lace-up

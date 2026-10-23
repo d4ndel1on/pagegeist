@@ -72,11 +72,34 @@ code {
   font-family: "Fraunces", Georgia, serif;
   font-size: 1.2rem;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .nav__links {
   display: flex;
   gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .nav__links {
+    gap: 0;
+  }
+
+  .nav .btn {
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav .nav__link--wide {
+    display: none;
+  }
+}
+
+/* Keep anchor targets clear of the sticky nav. */
+[id] {
+  scroll-margin-top: 80px;
 }
 
 .hero {
@@ -164,6 +187,18 @@ code {
   min-height: 280px;
 }
 
+.card code {
+  overflow-wrap: anywhere;
+}
+
+/* Single column on phones – otherwise the page gets wider than the screen. */
+@media (max-width: 700px) {
+  .cards--two,
+  .section--split {
+    grid-template-columns: 1fr;
+  }
+}
+
 .footer {
   padding: 120px clamp(16px, 5vw, 64px) 60px;
   border-top: 1px solid var(--line);
@@ -178,6 +213,8 @@ code {
 
 .btn {
   font: inherit;
+  display: inline-block;
+  text-decoration: none;
   font-size: 0.95rem;
   color: var(--text);
   background: var(--bg-elev);
@@ -286,35 +323,134 @@ code {
 
 /* ---------- Playground panel (ignored by the mascot) ---------- */
 
-.panel {
+/*
+ * Controls: a docked sidebar on wide screens (the page makes room for it, so it never covers
+ * text) and a bottom sheet on small screens. Header and close button stay visible while the
+ * body scrolls. Breakpoint is mirrored in App.tsx (DOCKED_QUERY).
+ */
+.panel,
+.panel-toggle {
   position: fixed;
-  left: 16px;
-  bottom: 16px;
   z-index: 10001;
-  width: min(300px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px);
-  overflow: auto;
-  display: grid;
-  gap: 10px;
-  padding: 12px 14px;
   font:
     12px / 1.4 ui-monospace,
     SFMono-Regular,
     Menlo,
     monospace;
   color: #ebe6f2;
-  background: rgba(18, 13, 24, 0.94);
+  background: rgba(18, 13, 24, 0.97);
   border: 1px solid #2d2537;
-  border-radius: 12px;
 }
 
-.panel summary {
-  cursor: pointer;
+.panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.panel__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 14px;
+  border-bottom: 1px solid #2d2537;
+}
+
+.panel__title {
+  flex: 1;
+  margin: 0;
   font-weight: 700;
 }
 
+.panel .panel__close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.panel__body {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 12px 14px 16px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
 .panel__state {
+  margin-left: 4px;
   color: #c49bff;
+}
+
+.panel-toggle {
+  left: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  padding: 10px 16px;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+@media (min-width: 1100px) {
+  :root {
+    --panel-width: 340px;
+  }
+
+  .panel {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--panel-width);
+    border-width: 0 0 0 1px;
+  }
+
+  :root[data-panel="open"] body {
+    padding-right: var(--panel-width);
+  }
+
+  /* Collapsed: the toggle sits in the empty margin right of the content, below the nav. */
+  .panel-toggle {
+    top: 88px;
+    right: 16px;
+    bottom: auto;
+    left: auto;
+  }
+}
+
+@media (max-width: 1099.98px) {
+  .panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: min(75dvh, 640px);
+    padding-bottom: env(safe-area-inset-bottom);
+    border-width: 1px 0 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* No keyboard on touch devices: hide the shortcut hint, make targets finger-sized. */
+@media (hover: none) {
+  .panel__keys {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .panel button,
+  .panel select,
+  .panel input[type="text"] {
+    min-height: 36px;
+  }
 }
 
 .panel__row {
@@ -394,9 +530,16 @@ code {
   grid-template-columns: 1fr;
 }
 
+/* Wide enough for the longest option name ("safeArea.bottom"); fields without a value
+   readout use the readout column too. */
 .panel__lab label {
   display: grid;
-  grid-template-columns: 6.5em minmax(0, 1fr) 4em;
+  grid-template-columns: 9.5em minmax(0, 1fr) 3.5em;
+}
+
+.panel__lab label > select,
+.panel__lab label > input[type="text"] {
+  grid-column: span 2;
 }
 
 .panel__lab output {

@@ -46,11 +46,11 @@ Examples for your own triggers:
 
 | Trigger | Phrases |
 |---|---|
-| `poke` | "Did you just poke me?", "Again?", "Stop it.", "Rude.", "Hmpf.", "Poke me again. I dare you.", "I'm busy.", "Hands where I can see them." |
-| `grab` | "Put. Me. Down.", "Hands off the lace.", "I will haunt you.", "Excuse you?", "Unhand me." |
-| `cursorNear` | "Personal space.", "Can I help you?", "Your cursor's in my way.", "Mine.", "Go click something else.", "Scroll. Now." |
-| `sit` | "This button is mine now.", "I sit here now. Deal.", "…" |
-| `idle` | "\*sigh\*", "Bored.", "Entertain me.", "I was here first.", "This page is mine.", "Bow to the ghost." |
+| `poke` | "Did you just poke me?", "Again?", "Stop it.", "Rude.", "Hmpf.", "Poke me again. I dare you.", "I'm busy.", "Hands where I can see them.", "Who said you could touch me?", "Do that again. See what happens.", "Ghost, not toy." |
+| `grab` | "Put. Me. Down.", "Hands off the lace.", "I will haunt you.", "Excuse you?", "Unhand me.", "Careful. I am vintage.", "You will regret this.", "Down. Now." |
+| `cursorNear` | "Personal space.", "Can I help you?", "Your cursor's in my way.", "Mine.", "Go click something else.", "Scroll. Now.", "Back off.", "Did I say you could come closer?", "Hover somewhere else." |
+| `sit` | "This button is mine now.", "I sit here now. Deal.", "…", "Throne acquired.", "Not moving. Make me.", "My seat. My rules." |
+| `idle` | "\*sigh\*", "Bored.", "Entertain me.", "I was here first.", "This page is mine.", "Bow to the ghost.", "I'm waiting.", "Amuse me. Now.", "I could rearrange your buttons, you know.", "Tick tock." |
 | `land` | (none) |
 
 They are exported as `DEFAULT_PHRASES` if you want to extend them instead of replacing them.

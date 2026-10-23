@@ -40,7 +40,12 @@ const DEFAULT_OUTLINE_COLOR = 'rgba(220, 205, 255, 0.32)';
 const DEFAULT_RESPAWN_AFTER = 1.5;
 
 /** Keyboard shortcuts – also listed in the panel. */
-const SHORTCUTS = 'D debug · P pause · R respawn · S slow-mo';
+const SHORTCUTS = 'D debug · P pause · R respawn · S slow-mo · Esc close';
+
+/** Keep in sync with the sidebar breakpoint in styles.css. */
+const DOCKED_QUERY = '(min-width: 1100px)';
+
+const REPO_URL = 'https://github.com/d4ndel1on/pagegeist';
 
 export function App(): JSX.Element {
   const ref = useRef<PagegeistHandle>(null);
@@ -69,15 +74,32 @@ export function App(): JSX.Element {
   const [customPhrases, setCustomPhrases] = useState<Partial<Record<PhraseTrigger, string>>>({});
   const [light, setLight] = useState(false);
   const [text, setText] = useState('This page is mine now.');
+  // Docked sidebar on wide screens starts open; the bottom sheet on small screens starts closed.
+  const [panelOpen, setPanelOpen] = useState(() => window.matchMedia(DOCKED_QUERY).matches);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const panelTouched = useRef(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = light ? 'light' : 'dark';
   }, [light]);
 
-  // Keyboard shortcuts. Ignored while typing and for any modifier combination
-  // (so browser shortcuts like Cmd+R or Ctrl+D keep working).
+  // The page reserves room for the docked sidebar via this attribute (see styles.css).
+  // Focus follows the toggle so keyboard users don't get lost – but not on the first render.
+  useEffect(() => {
+    document.documentElement.dataset.panel = panelOpen ? 'open' : 'closed';
+    if (panelTouched.current) (panelOpen ? closeRef : toggleRef).current?.focus();
+    panelTouched.current = true;
+  }, [panelOpen]);
+
+  // Keyboard shortcuts. Escape always closes the panel; the letters are ignored while typing
+  // and for any modifier combination (so browser shortcuts like Cmd+R or Ctrl+D keep working).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPanelOpen(false);
+        return;
+      }
       if (e.metaKey || e.ctrlKey || e.altKey || e.repeat || isEditable(e.target)) return;
       const key = e.key.toLowerCase();
       if (key === 'd') setDebug((d) => !d);
@@ -165,191 +187,206 @@ export function App(): JSX.Element {
       />
       <Page />
 
-      <aside className="panel" data-pagegeist-ignore>
-        <details open>
-          <summary>
-            Pagegeist · <span className="panel__state">{state ?? '–'}</span>
-          </summary>
-          <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+      {!panelOpen && (
+        <button
+          ref={toggleRef}
+          type="button"
+          className="panel-toggle"
+          aria-controls="controls"
+          aria-expanded={false}
+          onClick={() => setPanelOpen(true)}
+          data-pagegeist-ignore
+        >
+          <span aria-hidden="true">⚙</span> Controls <span className="panel__state">{state ?? '–'}</span>
+        </button>
+      )}
+      <aside id="controls" className="panel" aria-label="Pagegeist controls" hidden={!panelOpen} data-pagegeist-ignore>
+        <div className="panel__header">
+          <p className="panel__title">
+            Controls <span className="panel__state">{state ?? '–'}</span>
+          </p>
+          <button
+            ref={closeRef}
+            type="button"
+            className="panel__close"
+            aria-label="Close controls"
+            title="Close (Esc)"
+            onClick={() => setPanelOpen(false)}
+          >
+            ×
+          </button>
+        </div>
+        <div className="panel__body">
+          <div className="panel__row">
+            <button type="button" onClick={() => setDebug((d) => !d)} title="Key D">
+              Debug
+            </button>
+            <button type="button" title="Key P" onClick={() => togglePause(ref.current)}>
+              Pause / resume
+            </button>
+            <button type="button" onClick={() => ref.current?.respawn()} title="respawn() · Key R">
+              Summon
+            </button>
+            <button type="button" onClick={() => setTimeScale((t) => (t === 1 ? 0.25 : 1))} title="Key S">
+              Slow-mo
+            </button>
+          </div>
+          <p className="panel__stats panel__keys">Keys: {SHORTCUTS}</p>
+          <form
+            className="panel__row"
+            onSubmit={(e) => {
+              e.preventDefault();
+              ref.current?.say(text);
+            }}
+          >
+            <input type="text" value={text} onChange={(e) => setText(e.target.value)} aria-label="Phrase" />
+            <button type="submit" title="say(text)">
+              Annoy her
+            </button>
+          </form>
+
+          <fieldset>
+            <legend>behaviors</legend>
+            {(Object.keys(DEFAULT_BEHAVIORS) as Array<keyof BehaviorOptions>).map((key) => (
+              <label key={key}>
+                <input
+                  type="checkbox"
+                  checked={behaviors[key]}
+                  onChange={(e) => setBehaviors((b) => ({ ...b, [key]: e.target.checked }))}
+                />
+                {key}
+              </label>
+            ))}
+          </fieldset>
+
+          <fieldset>
+            <legend>options</legend>
+            <Toggle label="fishnets" value={fishnets} onChange={setFishnets} />
+            <Toggle label="announce" value={announce} onChange={setAnnounce} />
+            <Toggle label="markElements" value={markElements} onChange={setMarkElements} />
+            <Toggle label="light page" value={light} onChange={setLight} />
+          </fieldset>
+
+          <fieldset className="panel__lab">
+            <legend>look</legend>
+            <Range label="size" min={48} max={240} step={1} value={size} onChange={setSize} format={(v) => `${v}px`} />
+            <Select label="outfit" value={outfit} options={['classic', 'corset']} onChange={setOutfit} />
+            <Select label="shoes" value={shoes} options={['boots', 'heels']} onChange={setShoes} />
+            <Select label="outline" value={outline} options={['auto', 'always', 'never']} onChange={setOutline} />
+            <label>
+              outlineColor
+              <input
+                type="color"
+                value={outlineColor || '#dccdff'}
+                onChange={(e) => setOutlineColor(e.target.value)}
+                aria-label="Outline color"
+              />
+              <button type="button" onClick={() => setOutlineColor('')} disabled={!outlineColor}>
+                reset
+              </button>
+            </label>
+          </fieldset>
+
+          <fieldset className="panel__lab">
+            <legend>placement</legend>
+            <Select label="spawn" value={spawn} options={['random', 'left', 'center', 'right']} onChange={setSpawn} />
+            <Select label="textLines" value={textLines} options={['all', 'first', 'none']} onChange={setTextLines} />
+            <Range label="minWidth" min={0} max={200} step={1} value={minWidth} onChange={setMinWidth} />
+            <label title="Comma-separated CSS selectors that never become platforms">
+              ignore
+              <input type="text" value={ignore} placeholder=".nav, h1" onChange={(e) => setIgnore(e.target.value)} />
+            </label>
+            <label title="px; empty = auto (detects fixed/sticky headers)">
+              safeArea.top
+              <input
+                type="text"
+                inputMode="numeric"
+                value={safeTop}
+                placeholder="auto"
+                onChange={(e) => setSafeTop(e.target.value)}
+              />
+            </label>
+            <label title="px; empty = auto (detects fixed/sticky footers)">
+              safeArea.bottom
+              <input
+                type="text"
+                inputMode="numeric"
+                value={safeBottom}
+                placeholder="auto"
+                onChange={(e) => setSafeBottom(e.target.value)}
+              />
+            </label>
+            <Range
+              label="respawnAfter"
+              min={0}
+              max={5}
+              step={0.5}
+              value={respawnAfter}
+              onChange={setRespawnAfter}
+              format={(v) => `${v}s`}
+            />
+          </fieldset>
+
+          <fieldset className="panel__lab">
+            <legend>motion & controls</legend>
+            <Range
+              label="timeScale"
+              min={0.1}
+              max={2}
+              step={0.05}
+              value={timeScale}
+              onChange={setTimeScale}
+              format={(v) => `${v.toFixed(2)}×`}
+            />
+            <Select
+              label="reducedMotion"
+              value={reducedMotion}
+              options={['static', 'calm', 'hidden', 'ignore']}
+              onChange={setReducedMotion}
+              title="Only applies when the OS setting 'reduce motion' is on"
+            />
+            <Select
+              label="pauseControl"
+              value={pausePosition}
+              options={['off', 'bottom-right', 'bottom-left', 'top-right', 'top-left']}
+              onChange={setPausePosition}
+            />
             <div className="panel__row">
-              <button type="button" onClick={() => setDebug((d) => !d)} title="Key D">
-                Debug
-              </button>
-              <button type="button" title="Key P" onClick={() => togglePause(ref.current)}>
-                Pause / resume
-              </button>
-              <button type="button" onClick={() => ref.current?.respawn()} title="respawn() · Key R">
-                Summon
-              </button>
-              <button type="button" onClick={() => setTimeScale((t) => (t === 1 ? 0.25 : 1))} title="Key S">
-                Slow-mo
+              <button
+                type="button"
+                onClick={() => {
+                  setDebug(true);
+                  setTimeScale(0.25);
+                }}
+              >
+                Debug + slow-mo
               </button>
             </div>
-            <p className="panel__stats">Keys: {SHORTCUTS}</p>
-            <form
-              className="panel__row"
-              onSubmit={(e) => {
-                e.preventDefault();
-                ref.current?.say(text);
-              }}
-            >
-              <input type="text" value={text} onChange={(e) => setText(e.target.value)} aria-label="Phrase" />
-              <button type="submit" title="say(text)">
-                Annoy her
-              </button>
-            </form>
+          </fieldset>
 
-            <fieldset>
-              <legend>behaviors</legend>
-              {(Object.keys(DEFAULT_BEHAVIORS) as Array<keyof BehaviorOptions>).map((key) => (
-                <label key={key}>
-                  <input
-                    type="checkbox"
-                    checked={behaviors[key]}
-                    onChange={(e) => setBehaviors((b) => ({ ...b, [key]: e.target.checked }))}
-                  />
-                  {key}
-                </label>
-              ))}
-            </fieldset>
+          <fieldset className="panel__lab">
+            <legend>phrases</legend>
+            <Select label="trigger" value={trigger} options={TRIGGERS} onChange={setTrigger} />
+            <textarea
+              rows={4}
+              aria-label={`Custom ${trigger} phrases, one per line`}
+              value={customPhrases[trigger] ?? ''}
+              placeholder={
+                DEFAULT_PHRASES[trigger].length
+                  ? `Built-in (one per line):\n${DEFAULT_PHRASES[trigger].join('\n')}`
+                  : 'Silent by default. One phrase per line.'
+              }
+              onChange={(e) => setCustomPhrases((p) => ({ ...p, [trigger]: e.target.value }))}
+            />
+          </fieldset>
 
-            <fieldset>
-              <legend>options</legend>
-              <Toggle label="fishnets" value={fishnets} onChange={setFishnets} />
-              <Toggle label="announce" value={announce} onChange={setAnnounce} />
-              <Toggle label="markElements" value={markElements} onChange={setMarkElements} />
-              <Toggle label="light page" value={light} onChange={setLight} />
-            </fieldset>
-
-            <fieldset className="panel__lab">
-              <legend>look</legend>
-              <Range
-                label="size"
-                min={48}
-                max={240}
-                step={1}
-                value={size}
-                onChange={setSize}
-                format={(v) => `${v}px`}
-              />
-              <Select label="outfit" value={outfit} options={['classic', 'corset']} onChange={setOutfit} />
-              <Select label="shoes" value={shoes} options={['boots', 'heels']} onChange={setShoes} />
-              <Select label="outline" value={outline} options={['auto', 'always', 'never']} onChange={setOutline} />
-              <label>
-                outlineColor
-                <input
-                  type="color"
-                  value={outlineColor || '#dccdff'}
-                  onChange={(e) => setOutlineColor(e.target.value)}
-                  aria-label="Outline color"
-                />
-                <button type="button" onClick={() => setOutlineColor('')} disabled={!outlineColor}>
-                  reset
-                </button>
-              </label>
-            </fieldset>
-
-            <fieldset className="panel__lab">
-              <legend>placement</legend>
-              <Select label="spawn" value={spawn} options={['random', 'left', 'center', 'right']} onChange={setSpawn} />
-              <Select label="textLines" value={textLines} options={['all', 'first', 'none']} onChange={setTextLines} />
-              <Range label="minWidth" min={0} max={200} step={1} value={minWidth} onChange={setMinWidth} />
-              <label title="Comma-separated CSS selectors that never become platforms">
-                ignore
-                <input type="text" value={ignore} placeholder=".nav, h1" onChange={(e) => setIgnore(e.target.value)} />
-              </label>
-              <label title="px; empty = auto (detects fixed/sticky headers)">
-                safeArea.top
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={safeTop}
-                  placeholder="auto"
-                  onChange={(e) => setSafeTop(e.target.value)}
-                />
-              </label>
-              <label title="px; empty = auto (detects fixed/sticky footers)">
-                safeArea.bottom
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={safeBottom}
-                  placeholder="auto"
-                  onChange={(e) => setSafeBottom(e.target.value)}
-                />
-              </label>
-              <Range
-                label="respawnAfter"
-                min={0}
-                max={5}
-                step={0.5}
-                value={respawnAfter}
-                onChange={setRespawnAfter}
-                format={(v) => `${v}s`}
-              />
-            </fieldset>
-
-            <fieldset className="panel__lab">
-              <legend>motion & controls</legend>
-              <Range
-                label="timeScale"
-                min={0.1}
-                max={2}
-                step={0.05}
-                value={timeScale}
-                onChange={setTimeScale}
-                format={(v) => `${v.toFixed(2)}×`}
-              />
-              <Select
-                label="reducedMotion"
-                value={reducedMotion}
-                options={['static', 'calm', 'hidden', 'ignore']}
-                onChange={setReducedMotion}
-                title="Only applies when the OS setting 'reduce motion' is on"
-              />
-              <Select
-                label="pauseControl"
-                value={pausePosition}
-                options={['off', 'bottom-right', 'bottom-left', 'top-right', 'top-left']}
-                onChange={setPausePosition}
-              />
-              <div className="panel__row">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDebug(true);
-                    setTimeScale(0.25);
-                  }}
-                >
-                  Debug + slow-mo
-                </button>
-              </div>
-            </fieldset>
-
-            <fieldset className="panel__lab">
-              <legend>phrases</legend>
-              <Select label="trigger" value={trigger} options={TRIGGERS} onChange={setTrigger} />
-              <textarea
-                rows={4}
-                aria-label={`Custom ${trigger} phrases, one per line`}
-                value={customPhrases[trigger] ?? ''}
-                placeholder={
-                  DEFAULT_PHRASES[trigger].length
-                    ? `Built-in (one per line):\n${DEFAULT_PHRASES[trigger].join('\n')}`
-                    : 'Silent by default. One phrase per line.'
-                }
-                onChange={(e) => setCustomPhrases((p) => ({ ...p, [trigger]: e.target.value }))}
-              />
-            </fieldset>
-
-            {LAB_ENABLED && (
-              <Suspense fallback={null}>
-                <GaitLab size={size} />
-              </Suspense>
-            )}
-            <pre>{snippet}</pre>
-          </div>
-        </details>
+          {LAB_ENABLED && (
+            <Suspense fallback={null}>
+              <GaitLab size={size} />
+            </Suspense>
+          )}
+          <pre>{snippet}</pre>
+        </div>
       </aside>
     </>
   );
@@ -499,17 +536,17 @@ function Page() {
   return (
     <>
       <nav className="nav">
-        <span className="nav__brand">Night Atelier</span>
+        <span className="nav__brand">Hollow House</span>
         <div className="nav__links">
-          <button type="button" className="btn btn--ghost">
-            Collection
-          </button>
-          <button type="button" className="btn btn--ghost">
-            Journal
-          </button>
-          <button type="button" className="btn btn--ghost">
-            Contact
-          </button>
+          <a className="btn btn--ghost nav__link--wide" href="#how-it-works">
+            How it works
+          </a>
+          <a className="btn btn--ghost" href={`${REPO_URL}/blob/main/docs/guide.md`}>
+            Docs
+          </a>
+          <a className="btn btn--ghost" href={REPO_URL}>
+            GitHub
+          </a>
         </div>
       </nav>
 
@@ -534,7 +571,7 @@ function Page() {
       </header>
 
       <main>
-        <section className="section">
+        <section className="section" id="how-it-works">
           <h2>How it works</h2>
           <p>
             A transparent canvas covers the whole page and ignores pointer events. Only a small invisible hitbox follows
@@ -631,7 +668,7 @@ function Page() {
       </main>
 
       <footer className="footer">
-        <p>Night Atelier · Playground for the Pagegeist website mascot</p>
+        <p>Hollow House · Playground for the Pagegeist website mascot</p>
         <p className="footer__note">No ghosts were harmed. Several cursors were.</p>
       </footer>
     </>

@@ -17,7 +17,7 @@
   ],
   "license": "(MIT AND CC0-1.0)",
   "author": "d4ndel1on",
-  "homepage": "https://github.com/d4ndel1on/pagegeist#readme",
+  "homepage": "https://d4ndel1on.github.io/pagegeist/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/d4ndel1on/pagegeist.git"
@@ -98,7 +98,7 @@
       "name": "core (vanilla)",
       "path": "dist/index.js",
       "import": "{ createPagegeist }",
-      "limit": "24.25 kB"
+      "limit": "24.5 kB"
     },
     {
       "name": "react adapter",
