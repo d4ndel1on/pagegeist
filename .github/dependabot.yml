@@ -24,6 +24,9 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: react-dom
         update-types: [version-update:semver-major]
+      # Node types follow the Node major in .nvmrc, not the latest Node release.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
 
   # Starter apps (examples/starters/*), also the StackBlitz demos: keep Next.js, Vite, React and
   # the published @d4ndel1on/pagegeist current in their lockfiles, one grouped PR. CI tests them
@@ -36,3 +39,6 @@ updates:
     groups:
       starters:
         patterns: ['*']
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
