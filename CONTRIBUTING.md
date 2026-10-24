@@ -117,7 +117,8 @@ src/
     types.ts          shared internal types (states, vectors)
     render/           GothRenderer (procedural character), walk cycle, effects, render queue
 playground/           Vite + React demo app (deployed to GitHub Pages)
-scripts/              build helpers (check-dist.mjs: post-build dist sanity checks; check-snippets.mjs: docs snippets)
+scripts/              build helpers (check-dist.mjs: post-build dist sanity checks; check-snippets.mjs: docs snippets;
+                      og-image.mjs: renders the playground's link preview image from dist/)
 examples/             type-checked snippets embedded in the docs
   starters/           complete Next.js / React / Vite apps: StackBlitz demos and CI integration tests
 e2e/                  Playwright browser tests (smoke tests of dist/, starter apps)
@@ -160,6 +161,10 @@ From then on every release goes through the workflow.
 `.github/workflows/pages.yml` builds the playground (`npm run build:playground`) and deploys
 `dist-playground/` on every push to `main` (or manually via *Run workflow*). Pages must be
 enabled once under repository *Settings → Pages → Source: GitHub Actions*.
+
+The link preview image `playground/public/og-image.jpg` is rendered by `node scripts/og-image.mjs`
+(after `npm run build`; uses Playwright's Chromium and Google Fonts). Re-run it when the
+characters' look changes.
 
 ## License
 
