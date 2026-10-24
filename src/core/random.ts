@@ -32,7 +32,12 @@ export function createRandom(source: () => number = Math.random): Random {
   };
 }
 
-/** Small seeded PRNG (mulberry32) for reproducible behavior, e.g. `random: seeded(42)`. */
+/**
+ * Small seeded PRNG (mulberry32) for reproducible behavior, e.g. in tests.
+ *
+ * @example
+ * createPagegeist({ random: seeded(42) });
+ */
 export function seeded(seed: number): () => number {
   let a = seed >>> 0;
   return () => {

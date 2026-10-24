@@ -23,7 +23,7 @@ npm run test:coverage   # Vitest with V8 coverage (text summary + HTML report in
 ## Before you open a pull request
 
 ```sh
-npm run ci         # lint, typecheck, tests, build, package/dist checks, size budget, playground build
+npm run ci         # lint, typecheck, snippet check, tests, build, package/dist checks, size budget, playground build
 npm run changeset  # describe user-facing changes (skip for docs/internal-only changes)
 ```
 
@@ -31,6 +31,7 @@ npm run changeset  # describe user-facing changes (skip for docs/internal-only c
 - **Tests**: [Vitest](https://vitest.dev) with happy-dom. Physics and behavior tests use `seeded()` randomness, so they are deterministic. Add a test for every bug fix.
 - **Size**: the bundle budget is enforced by `size-limit` (see [Size budget](#size-budget)). If you need to raise it, explain why in the PR.
 - **Dependencies**: the package has zero runtime dependencies. Please keep it that way.
+- **Docs snippets**: copy-paste snippets live in `examples/` (type-checked and linted) and are embedded in README.md, `docs/` and `playground/public/llms.txt` after a `<!-- snippet: examples/x.tsx -->` marker. Edit the example, then run `node scripts/check-snippets.mjs --fix`. The same script keeps pinned CDN versions in sync; the release workflow runs it after `changeset version`.
 - **Language**: code, comments and docs are in English.
 
 ## Size budget
@@ -101,9 +102,10 @@ src/
     types.ts          shared internal types (states, vectors)
     render/           GothRenderer (procedural character), walk cycle, effects, render queue
 playground/           Vite + React demo app (deployed to GitHub Pages)
-scripts/              build helpers (check-dist.mjs: post-build dist sanity checks)
+scripts/              build helpers (check-dist.mjs: post-build dist sanity checks; check-snippets.mjs: docs snippets)
+examples/             type-checked snippets embedded in the docs
 test/                 Vitest tests
-docs/                 documentation
+docs/                 documentation (shipped in the npm package)
 ```
 
 ## Releases

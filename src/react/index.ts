@@ -93,6 +93,11 @@ function sameOptions(a: ResolvedOptions, b?: ResolvedOptions): boolean {
 /**
  * Hook version of `<Pagegeist />`: mounts the mascot while the calling component is
  * mounted and keeps it in sync with `options` (see {@link PagegeistProps} for the semantics).
+ * Use it in one component only – each call creates its own mascot.
+ *
+ * @example
+ * const pagegeist = usePagegeist({ pauseControl: true });
+ * useEffect(() => pagegeist.on('poke', () => analytics.track('mascot_poked')), [pagegeist]);
  */
 export function usePagegeist(options: PagegeistOptions = {}): PagegeistHandle {
   const self = useRef<HookState>({ instance: null, options, subs: new Set() }).current;
@@ -165,8 +170,13 @@ export function usePagegeist(options: PagegeistOptions = {}): PagegeistHandle {
 
 /**
  * Drop-in component. Renders nothing itself – the mascot lives in a fixed overlay
- * appended to `document.body` (or `container`). Safe to render on the server.
+ * appended to `document.body` (or `container`). Render it once, e.g. in the root layout.
+ * Safe to render on the server and marked `"use client"`, so a Next.js server component
+ * layout can render it directly (callback props need a client component, though).
  * See {@link PagegeistProps} for how prop changes are applied.
+ *
+ * @example
+ * <Pagegeist pauseControl />
  *
  * @example
  * const ref = useRef<PagegeistHandle>(null);

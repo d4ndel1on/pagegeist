@@ -30,9 +30,51 @@
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <meta name="theme-color" content="#0f0c14" />
     <link rel="stylesheet" href="./styles.css" />
+
+    <!-- Structured data for search engines and agents (kept version-free so it cannot go stale). -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "pagegeist",
+        "alternateName": "@d4ndel1on/pagegeist",
+        "description": "Animated mascot overlay for web pages: a bratty gothic poltergeist that walks on your headings, sits on your buttons and climbs your text. Zero dependencies, React adapter included (SSR-safe, Next.js ready).",
+        "url": "https://d4ndel1on.github.io/pagegeist/",
+        "codeRepository": "https://github.com/d4ndel1on/pagegeist",
+        "programmingLanguage": ["TypeScript", "JavaScript"],
+        "runtimePlatform": "Web browser",
+        "license": ["https://opensource.org/license/mit", "https://creativecommons.org/publicdomain/zero/1.0/"],
+        "author": { "@type": "Person", "name": "d4ndel1on", "url": "https://github.com/d4ndel1on" },
+        "keywords": "website mascot, animated mascot, web pet, easter egg, canvas, React, Next.js, TypeScript",
+        "image": "https://d4ndel1on.github.io/pagegeist/og-image.jpg",
+        "sameAs": ["https://www.npmjs.com/package/@d4ndel1on/pagegeist"]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <!-- Static summary for visitors and crawlers without JavaScript (the demo itself needs JS). -->
+    <noscript>
+      <main style="max-width: 40rem; margin: 3rem auto; padding: 0 1rem; color: #e8e2f0; font-family: system-ui, sans-serif">
+        <h1>Pagegeist</h1>
+        <p>
+          An animated mascot overlay for web pages: a bratty gothic poltergeist that walks on your headings, sits on
+          your buttons and climbs your text. Zero dependencies, React adapter included. This live demo needs JavaScript.
+        </p>
+        <pre><code>npm install @d4ndel1on/pagegeist</code></pre>
+        <pre><code>import { createPagegeist } from '@d4ndel1on/pagegeist';
+createPagegeist({ pauseControl: true });</code></pre>
+        <p>
+          React: render <code>&lt;Pagegeist pauseControl /&gt;</code> from <code>@d4ndel1on/pagegeist/react</code> once in
+          your root layout.
+        </p>
+        <p>
+          <a href="https://github.com/d4ndel1on/pagegeist">Source and docs on GitHub</a> ·
+          <a href="https://www.npmjs.com/package/@d4ndel1on/pagegeist">npm</a> ·
+          <a href="./llms.txt">llms.txt</a>
+        </p>
+      </main>
+    </noscript>
     <script type="module" src="./main.tsx"></script>
   </body>
 </html>

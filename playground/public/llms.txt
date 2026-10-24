@@ -1,0 +1,31 @@
+# pagegeist
+
+> Animated mascot overlay for web pages (npm: @d4ndel1on/pagegeist): a small, bratty gothic poltergeist drawn on a fullscreen canvas that walks on the page's real headings, text lines, buttons and cards. Purely decorative and accessible (aria-hidden, reduced motion, optional pause control). Zero runtime dependencies, vanilla JS core plus a React adapter that is SSR-safe and marked "use client" (Next.js App Router ready). TypeScript types included. MIT code, CC0 artwork.
+
+Install with `npm install @d4ndel1on/pagegeist`. React projects render `<Pagegeist pauseControl />` from `@d4ndel1on/pagegeist/react` once in the root layout; everything else calls `createPagegeist()` from `@d4ndel1on/pagegeist` in the browser and `destroy()` on teardown:
+
+<!-- snippet: examples/minimal.ts -->
+```ts
+import { createPagegeist } from '@d4ndel1on/pagegeist';
+
+createPagegeist({ pauseControl: true }); // React: <Pagegeist pauseControl /> from '@d4ndel1on/pagegeist/react'
+```
+
+Key rules: mount exactly one mascot; call `createPagegeist()` only in the browser (importing is SSR-safe); pair every `createPagegeist()` with `destroy()`; React props are declarative while `instance.update()` merges; keep `pauseControl` on for WCAG 2.2.2. The usage guide for agents below covers Next.js, Vite, StrictMode, stacking and tests.
+
+## Docs
+
+- [Usage for agents](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/usage-for-agents.md): copy-paste setups (vanilla, React, Next.js App Router, Vite) and the rules for a correct integration
+- [API reference](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/api.md): every option with type and default, events, methods, exports
+- [Usage guide](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/guide.md): how platforms, safe area, phrases, React semantics, stacking and cleanup work
+- [Accessibility](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/accessibility.md): reduced motion modes, pause control, screen readers
+- [Full documentation in one file](https://d4ndel1on.github.io/pagegeist/llms-full.txt): all of the above plus README, recipes, FAQ and character notes
+
+## Optional
+
+- [Recipes](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/recipes.md): i18n, easter eggs, CTA reactions, quiet mode, CDN usage, tests
+- [FAQ & troubleshooting](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/faq.md): performance, z-index, sticky headers, CSP, browser support
+- [The character](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/character.md): design, wardrobe options, artwork license
+- [README](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/README.md): overview
+- [Live demo](https://d4ndel1on.github.io/pagegeist/): interactive playground with every option
+- [Source code](https://github.com/d4ndel1on/pagegeist) · [npm package](https://www.npmjs.com/package/@d4ndel1on/pagegeist) · [Changelog](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/CHANGELOG.md)

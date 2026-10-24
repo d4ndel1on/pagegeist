@@ -17,22 +17,44 @@ import { type MascotRenderer, RenderQueue, type RenderState, Z } from './render/
 import { MascotState, type Rect, type Vec2 } from './types';
 import { DomCollisionWorld, IGNORE_ATTRIBUTE } from './World';
 
-/** Public handle returned by `createPagegeist()`. */
+/** Public handle returned by `createPagegeist()`. Call `destroy()` when you are done with it. */
 export interface PagegeistInstance {
   /** Current activity. */
   readonly state: PagegeistState;
+  /** Whether the simulation is paused (via `pause()`, the `paused` option or the pause button). */
   readonly paused: boolean;
-  /** Show a speech bubble. Text is rendered as plain text, never as HTML. */
+  /**
+   * Show a speech bubble. Text is rendered as plain text, never as HTML. `duration` is in
+   * seconds; by default it scales with the text length (2–5 s).
+   */
   say(text: string, options?: { duration?: number }): void;
+  /**
+   * Freeze her. She does not move and cannot be grabbed; pausing during a drag releases her.
+   * The animation loop sleeps while paused.
+   */
   pause(): void;
+  /** Continue after `pause()`. */
   resume(): void;
   /** Let her fall into view again (or reappear on an element in static mode). */
   respawn(): void;
-  /** Update options at runtime. `container`, `size` and `random` cannot be changed. */
+  /**
+   * Update options at runtime. **Merges**: only the given keys change, nested objects
+   * (`behaviors`, `platforms`, `safeArea`) are merged per key, and omitted keys keep their
+   * current value – pass a default explicitly to reset it. Passing a callback key replaces the
+   * callback, passing `undefined` removes it. `container`, `size` and `random` cannot be changed
+   * (destroy and recreate instead). The React component is declarative instead.
+   *
+   * @example
+   * pagegeist.update({ behaviors: { hang: false } }); // every other behavior stays as it was
+   * pagegeist.update({ behaviors: { hang: true } });  // reset explicitly
+   */
   update(options: PagegeistOptions): void;
   /** Subscribe to an event. Returns an unsubscribe function. */
   on<K extends PagegeistEventName>(type: K, listener: (event: PagegeistEventMap[K]) => void): () => void;
-  /** Stop everything and remove all DOM nodes and listeners. Idempotent. */
+  /**
+   * Stop everything and remove all DOM nodes, listeners, observers and attributes she set.
+   * Idempotent. Call it on teardown (effect cleanup, unmount hook, HMR dispose).
+   */
   destroy(): void;
 }
 

@@ -4,14 +4,19 @@
   "description": "A bratty gothic poltergeist that haunts your web page: she walks on your headings, sits on your buttons, hangs from edges and climbs your text – mostly to annoy you. Zero dependencies, React adapter included.",
   "keywords": [
     "mascot",
+    "website-mascot",
+    "web-pet",
+    "desktop-pet",
     "react",
+    "nextjs",
+    "typescript",
     "canvas",
     "overlay",
     "animation",
     "character",
     "easter-egg",
+    "halloween",
     "goth",
-    "desktop-pet",
     "poltergeist",
     "ghost"
   ],
@@ -39,6 +44,7 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
+    "docs/*.md",
     "LICENSE",
     "LICENSE-ARTWORK"
   ],
@@ -47,7 +53,7 @@
     "build": "tsdown",
     "build:playground": "vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p examples",
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",
@@ -55,9 +61,11 @@
     "test:coverage": "vitest run --coverage",
     "check:package": "npm run check:dist && publint && attw --pack . --profile esm-only",
     "check:dist": "node scripts/check-dist.mjs",
+    "check:snippets": "node scripts/check-snippets.mjs",
     "size": "size-limit",
-    "ci": "npm run lint && npm run typecheck && npm run test && npm run build && npm run check:package && npm run size && npm run build:playground",
+    "ci": "npm run lint && npm run typecheck && npm run check:snippets && npm run test && npm run build && npm run check:package && npm run size && npm run build:playground",
     "changeset": "changeset",
+    "version-packages": "changeset version && node scripts/check-snippets.mjs --fix",
     "release": "npm run build && changeset publish"
   },
   "peerDependencies": {

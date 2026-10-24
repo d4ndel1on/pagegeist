@@ -1,0 +1,9 @@
+{
+  // Copy-paste snippets: written like user code, so no explicit return types (isolatedDeclarations).
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "isolatedDeclarations": false,
+    "declaration": false
+  },
+  "include": ["."]
+}

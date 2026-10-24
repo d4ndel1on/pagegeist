@@ -7,12 +7,28 @@
 
 ***She lives here now. You're just visiting.***
 
-**A tiny, bratty gothic poltergeist who haunts your web page.** She walks on your headings,
-sits on your buttons, hangs from edges, shimmies along lines of text and climbs up – your
-real DOM is her level, and she acts like she owns it. Click her, drag her around, throw her
-(she will complain). Your page stays fully usable.
+**An animated mascot overlay for any web page – a tiny, bratty gothic poltergeist who haunts
+it.** She walks on your headings, sits on your buttons, hangs from edges, shimmies along lines
+of text and climbs up – your real DOM is her level, and she acts like she owns it. Click her,
+drag her around, throw her (she will complain). Your page stays fully usable.
 
-**[Live demo](https://d4ndel1on.github.io/pagegeist/)**
+Use her as an easter egg or to give a portfolio, landing page, docs site or side project some
+personality. Vanilla JS core with zero dependencies, plus a React adapter (Next.js ready).
+
+```sh
+npm install @d4ndel1on/pagegeist
+```
+
+<!-- snippet: examples/minimal.ts -->
+```ts
+import { createPagegeist } from '@d4ndel1on/pagegeist';
+
+createPagegeist({ pauseControl: true }); // React: <Pagegeist pauseControl /> from '@d4ndel1on/pagegeist/react'
+```
+
+**[Live demo](https://d4ndel1on.github.io/pagegeist/)** · [Quick start](#quick-start) ·
+Using an AI coding agent? Point it at [docs/usage-for-agents.md](docs/usage-for-agents.md)
+(also shipped in the npm package) or [llms.txt](https://d4ndel1on.github.io/pagegeist/llms.txt).
 
 ![Pagegeist sitting on the edge of a card on a dark page](docs/assets/screenshot.jpg)
 
@@ -43,7 +59,7 @@ Without a bundler, pin an exact version from a CDN:
 
 ```html
 <script type="module">
-  import { createPagegeist } from 'https://esm.sh/@d4ndel1on/pagegeist@0.1.0';
+  import { createPagegeist } from 'https://esm.sh/@d4ndel1on/pagegeist@0.1.2';
   createPagegeist();
 </script>
 ```
@@ -52,6 +68,7 @@ Without a bundler, pin an exact version from a CDN:
 
 ### React
 
+<!-- snippet: examples/react.tsx -->
 ```tsx
 import { Pagegeist } from '@d4ndel1on/pagegeist/react';
 
@@ -70,6 +87,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 The React entry is marked `"use client"`, so you can render it directly from a server
 component layout – no `dynamic(..., { ssr: false })` needed. It renders nothing on the server.
 
+<!-- snippet: examples/next-app-layout.tsx -->
 ```tsx
 // app/layout.tsx
 import { Pagegeist } from '@d4ndel1on/pagegeist/react';
@@ -87,10 +105,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```
 
 > Callback props (`onLand`, `phrases` as a function, …) cannot be passed from a server
-> component. Wrap `<Pagegeist />` in your own client component when you need them.
+> component. Wrap `<Pagegeist />` in your own client component when you need them – see
+> [Usage for agents](docs/usage-for-agents.md#nextjs-app-router).
 
 ### Vanilla JS
 
+<!-- snippet: examples/vanilla.ts -->
 ```ts
 import { createPagegeist } from '@d4ndel1on/pagegeist';
 
@@ -152,6 +172,7 @@ with fallbacks. Touch is supported: tap to poke, drag to carry and throw.
 
 | | |
 |---|---|
+| [Usage for agents](docs/usage-for-agents.md) | Copy-paste setups (vanilla, React, Next.js, Vite) and the rules that keep an integration correct |
 | [Usage guide](docs/guide.md) | How she works, platforms, phrases, events, React semantics, touch, stacking |
 | [API reference](docs/api.md) | Every option, event, method and export |
 | [Recipes](docs/recipes.md) | i18n, easter eggs, CTA reactions, quiet mode, CDN, tests … |

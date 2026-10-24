@@ -1,7 +1,13 @@
 import type { PhraseContext, PhraseList, PhraseMap, PhraseResolver, PhraseTrigger } from './options';
 import type { Random } from './random';
 
-/** Built-in phrases. Persona: the page's poltergeist – bratty, bossy, easily annoyed, never helpless. */
+/**
+ * Built-in phrases (frozen). Persona: the page's poltergeist – bratty, bossy, easily annoyed,
+ * never helpless. Spread a list to extend it instead of replacing it.
+ *
+ * @example
+ * createPagegeist({ phrases: { poke: [...DEFAULT_PHRASES.poke, 'Not the face.'] } });
+ */
 export const DEFAULT_PHRASES: Readonly<Record<PhraseTrigger, PhraseList>> = Object.freeze({
   poke: [
     'Did you just poke me?',
