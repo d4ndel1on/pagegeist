@@ -1,0 +1,16 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "pagegeist",
+  "description": "Animated mascot overlay for web pages: a gothic poltergeist drawn on a canvas that walks on the page's headings, text and buttons. Zero dependencies, vanilla JS core plus an SSR-safe React adapter (Next.js App Router ready).",
+  "folders": ["docs", "examples"],
+  "excludeFolders": ["src", "test", "playground", "scripts", ".changeset"],
+  "excludeFiles": ["CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "AGENTS.md", "CLAUDE.md"],
+  "rules": [
+    "Install with `npm install @d4ndel1on/pagegeist`. React apps import `<Pagegeist />` from `@d4ndel1on/pagegeist/react`; everything else uses `createPagegeist()` from `@d4ndel1on/pagegeist`.",
+    "Mount exactly one mascot, once, high in the tree (root layout) – never per page or route.",
+    "Call createPagegeist() only in the browser (useEffect, mount hook or module script); importing is SSR-safe. Pair every createPagegeist() with destroy() on teardown.",
+    "In the Next.js App Router, render <Pagegeist /> directly in a server component layout – no dynamic(..., { ssr: false }). Callback props need a client component wrapper.",
+    "React props are declarative (removing a prop restores its default); instance.update() merges. container, size and random cannot be changed via update().",
+    "Pass pauseControl (or wire your own control to `paused`) for WCAG 2.2.2, and keep the default reducedMotion: 'static'."
+  ]
+}
