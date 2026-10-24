@@ -59,7 +59,7 @@ Without a bundler, pin an exact version from a CDN:
 
 ```html
 <script type="module">
-  import { createPagegeist } from 'https://esm.sh/@d4ndel1on/pagegeist@0.1.2';
+  import { createPagegeist } from 'https://esm.sh/@d4ndel1on/pagegeist@0.1.3';
   createPagegeist();
 </script>
 ```
