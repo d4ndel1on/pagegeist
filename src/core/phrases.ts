@@ -64,7 +64,7 @@ export const DEFAULT_PHRASES: Readonly<Record<PhraseTrigger, PhraseList>> = Obje
 export const SAY_ATTRIBUTE = 'data-pagegeist-say';
 
 const pickFrom = (value: string | PhraseList | null | undefined, rng: Random): string | null | undefined => {
-  if (value === null || value === undefined) return value;
+  if (value == null) return value;
   if (typeof value === 'string') return value;
   return rng.pick(value) ?? null;
 };
@@ -106,5 +106,5 @@ export function resolvePhrase(config: PhraseMap | PhraseResolver, ctx: PhraseCon
     return null;
   }
   if (custom !== undefined) return custom;
-  return pickFrom(DEFAULT_PHRASES[ctx.trigger], rng) ?? null;
+  return rng.pick(DEFAULT_PHRASES[ctx.trigger]) ?? null;
 }

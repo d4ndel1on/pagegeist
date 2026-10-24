@@ -144,6 +144,16 @@ function fkLeg(hip: Vec2, t: number, k: number): { knee: Vec2; ankle: Vec2 } {
   return { knee, ankle: add(knee, dir(t + k), SK.shin) };
 }
 
+function ikArm(shoulder: Vec2, hand: Vec2, bend: number): { elbow: Vec2; hand: Vec2 } {
+  const r = ik(shoulder, hand, SK.upper, SK.fore, bend);
+  return { elbow: r.mid, hand: r.end };
+}
+
+function ikLeg(hip: Vec2, ankle: Vec2): { knee: Vec2; ankle: Vec2 } {
+  const r = ik(hip, ankle, SK.thigh, SK.shin, 1);
+  return { knee: r.mid, ankle: r.end };
+}
+
 /** Boot rotation around the ankle as drawn. */
 function bootAngle(l: Limb, grounded: boolean): number {
   if (l.footPitch !== null) return l.footPitch;
@@ -214,8 +224,7 @@ export class GothRenderer implements MascotRenderer {
   constructor(height: number) {
     this.scale = height / UNIT_HEIGHT;
     this.metrics = {
-      height: 120 * this.scale,
-      width: 30 * this.scale,
+      height: UNIT_HEIGHT * this.scale,
       hangReach: (SK.hipH + SK.torso + SK.upper + SK.fore + 3) * this.scale,
     };
   }
@@ -235,21 +244,12 @@ export class GothRenderer implements MascotRenderer {
   bounds(rs: RenderState): Rect {
     const sk = this.last ?? this.pose(rs);
     const pts = [sk.hip, sk.shoulder, sk.head, sk.near.hand, sk.far.hand, sk.near.ankle, sk.far.ankle, sk.near.knee];
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity;
-    for (const p of pts) {
-      minX = Math.min(minX, p.x);
-      maxX = Math.max(maxX, p.x);
-      minY = Math.min(minY, p.y);
-      maxY = Math.max(maxY, p.y);
-    }
+    const b = bbox(pts);
     const m = SK.headR + 4;
-    minX -= m;
-    maxX += m;
-    minY -= m;
-    maxY += 6;
+    const minX = b.x0 - m;
+    const maxX = b.x1 + m;
+    const minY = b.y0 - m;
+    const maxY = b.y1 + 6;
     const k = this.scale;
     const f = this.last ? this.fx : rs.facing;
     const [x0, x1] = f > 0 ? [minX * f, maxX * f] : [maxX * f, minX * f];
@@ -422,9 +422,7 @@ export class GothRenderer implements MascotRenderer {
 
     const shoulderOf = (h: Vec2, t: number) => add(h, upDir(t), SK.torso);
     const standLegs = (h: Vec2, nx = 3.5, fx = -3, nLift = 0, fLift = 0) => {
-      const n = ik(h, v(nx, -SK.ankle - nLift), SK.thigh, SK.shin, 1);
-      const f = ik(h, v(fx, -SK.ankle - fLift), SK.thigh, SK.shin, 1);
-      return { n: { knee: n.mid, ankle: n.end }, f: { knee: f.mid, ankle: f.end } };
+      return { n: ikLeg(h, v(nx, -SK.ankle - nLift)), f: ikLeg(h, v(fx, -SK.ankle - fLift)) };
     };
 
     switch (rs.state) {
@@ -446,11 +444,7 @@ export class GothRenderer implements MascotRenderer {
         const w = walkPose(walkPhase(rs.gait, this.metrics.height), undefined, rs.stride);
         hip = v(0, w.hipY);
         torso = w.torso;
-        const leg = (h: Vec2, target: Vec2) => {
-          const r = ik(h, target, SK.thigh, SK.shin, 1);
-          return { knee: r.mid, ankle: r.end };
-        };
-        legs = { n: leg(hip, ankleOf(w.near)), f: leg(hip, ankleOf(w.far)) };
+        legs = { n: ikLeg(hip, ankleOf(w.near)), f: ikLeg(hip, ankleOf(w.far)) };
         pitch = { n: w.near.pitch, f: w.far.pitch };
         // The upper body takes only part of the hip bob.
         chest = w.bob * WALK.chestComp;
@@ -513,9 +507,7 @@ export class GothRenderer implements MascotRenderer {
         const sp = rs.shimmyPhase;
         const hn = add(H, v(5 * Math.sin(sp), -2 * Math.max(0, Math.cos(sp))));
         const hf = add(H, v(-5 * Math.sin(sp) - 2, -2 * Math.max(0, -Math.cos(sp))));
-        const an = ik(s, hn, SK.upper, SK.fore, 1);
-        const af = ik(s, hf, SK.upper, SK.fore, 1);
-        arms = { n: { elbow: an.mid, hand: an.end }, f: { elbow: af.mid, hand: af.end } };
+        arms = { n: ikArm(s, hn, 1), f: ikArm(s, hf, 1) };
         legs = {
           n: fkLeg(hip, 0.05 + 0.12 * Math.sin(T * 2.1 + 0.5), -0.15),
           f: fkLeg(hip, -0.1 * Math.sin(T * 2.1 + 1.2), -0.25),
@@ -533,9 +525,7 @@ export class GothRenderer implements MascotRenderer {
         torso = 0.15 + 0.55 * Math.sin(Math.PI * p);
         const s = shoulderOf(hip, torso);
         const bend = H.y < s.y ? 1 : -1;
-        const an = ik(s, H, SK.upper, SK.fore, bend);
-        const af = ik(s, add(H, v(-3, 0)), SK.upper, SK.fore, bend);
-        arms = { n: { elbow: an.mid, hand: an.end }, f: { elbow: af.mid, hand: af.end } };
+        arms = { n: ikArm(s, H, bend), f: ikArm(s, add(H, v(-3, 0)), bend) };
         legs = {
           n: fkLeg(
             hip,
@@ -557,9 +547,7 @@ export class GothRenderer implements MascotRenderer {
         const sw2 = Math.sin(T * 2.4 + 1.7);
         legs = { n: fkLeg(hip, 1.42, -1.38 + 0.22 * sw), f: fkLeg(hip, 1.3, -1.4 + 0.22 * sw2) };
         const s = shoulderOf(hip, torso);
-        const an = ik(s, v(11, -9), SK.upper, SK.fore, -1);
-        const af = ik(s, v(-8, -1), SK.upper, SK.fore, -1);
-        arms = { n: { elbow: an.mid, hand: an.end }, f: { elbow: af.mid, hand: af.end } };
+        arms = { n: ikArm(s, v(11, -9), -1), f: ikArm(s, v(-8, -1), -1) };
         break;
       }
       case MascotState.GRABBED: {
@@ -639,15 +627,46 @@ function stroke(ctx: CanvasRenderingContext2D, a: Vec2, b: Vec2, width: number, 
   ctx.stroke();
 }
 
-function fillPoly(ctx: CanvasRenderingContext2D, pts: Vec2[], color: string): void {
-  ctx.fillStyle = color;
-  ctx.beginPath();
+/** Adds the polyline through `pts` to the current path (closed by default). */
+function polyPath(ctx: CanvasRenderingContext2D, pts: Vec2[], close = true): void {
   pts.forEach((p, i) => {
     if (i) ctx.lineTo(p.x, p.y);
     else ctx.moveTo(p.x, p.y);
   });
-  ctx.closePath();
+  if (close) ctx.closePath();
+}
+
+function fillPoly(ctx: CanvasRenderingContext2D, pts: Vec2[], color: string): void {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  polyPath(ctx, pts);
   ctx.fill();
+}
+
+/** Strokes the current path as lace trim: a solid band with a dashed highlight on top. */
+function laceStroke(ctx: CanvasRenderingContext2D, width: number, hiWidth: number, dash: number[]): void {
+  ctx.strokeStyle = C.lace;
+  ctx.lineWidth = width;
+  ctx.stroke();
+  ctx.strokeStyle = C.laceHi;
+  ctx.lineWidth = hiWidth;
+  ctx.setLineDash(dash);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function bbox(pts: Vec2[]): { x0: number; x1: number; y0: number; y1: number } {
+  let x0 = Infinity,
+    x1 = -Infinity,
+    y0 = Infinity,
+    y1 = -Infinity;
+  for (const p of pts) {
+    x0 = Math.min(x0, p.x);
+    x1 = Math.max(x1, p.x);
+    y0 = Math.min(y0, p.y);
+    y1 = Math.max(y1, p.y);
+  }
+  return { x0, x1, y0, y1 };
 }
 
 const perpOf = (d: Vec2): Vec2 => v(-d.y, d.x);
@@ -724,22 +743,13 @@ function shinPath(ctx: CanvasRenderingContext2D, l: Limb, w: LegShape): void {
     add(l.ankle, n, -w.ankle),
     add(l.knee, n, -w.knee),
   ];
-  pts.forEach((p, i) => {
-    if (i) ctx.lineTo(p.x, p.y);
-    else ctx.moveTo(p.x, p.y);
-  });
-  ctx.closePath();
+  polyPath(ctx, pts);
 }
 
 /** Path of a quad around a→b (half widths wa, wb). */
 function band(ctx: CanvasRenderingContext2D, a: Vec2, b: Vec2, wa: number, wb: number): void {
   const n = perpOf(norm(sub(b, a)));
-  const pts = [add(a, n, wa), add(b, n, wb), add(b, n, -wb), add(a, n, -wa)];
-  pts.forEach((p, i) => {
-    if (i) ctx.lineTo(p.x, p.y);
-    else ctx.moveTo(p.x, p.y);
-  });
-  ctx.closePath();
+  polyPath(ctx, [add(a, n, wa), add(b, n, wb), add(b, n, -wb), add(a, n, -wa)]);
 }
 
 /** Diamond mesh along `d` from `o` over `length`, wider than any leg (clip it). */
@@ -1204,17 +1214,10 @@ function drawArm(
   ];
   fillPoly(ctx, bell, velvet);
   // Lace cuff
-  ctx.strokeStyle = C.lace;
-  ctx.lineWidth = 2.6;
   ctx.beginPath();
-  ctx.moveTo(add(cuff, n, -6.4).x, add(cuff, n, -6.4).y);
-  ctx.quadraticCurveTo(cuff.x + fd.x * 3.2, cuff.y + fd.y * 3.2, add(cuff, n, 6.4).x, add(cuff, n, 6.4).y);
-  ctx.stroke();
-  ctx.strokeStyle = C.laceHi;
-  ctx.lineWidth = 0.7;
-  ctx.setLineDash([0.8, 0.9]);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  ctx.moveTo(...xy(add(cuff, n, -6.4)));
+  ctx.quadraticCurveTo(cuff.x + fd.x * 3.2, cuff.y + fd.y * 3.2, ...xy(add(cuff, n, 6.4)));
+  laceStroke(ctx, 2.6, 0.7, [0.8, 0.9]);
 }
 
 function convexHull(points: Vec2[]): Vec2[] {
@@ -1289,7 +1292,6 @@ function drawSkirtLayer(
   fillPoly(ctx, hull, color);
 
   // Handkerchief hem (asymmetric)
-  ctx.fillStyle = color;
   hems.forEach((hm, hi) => {
     const n = perpOf(hm.d);
     for (let i = 0; i < 4; i++) {
@@ -1299,9 +1301,9 @@ function drawSkirtLayer(
       const base = add(hm.p, n, o);
       const tip = add(add(base, hm.d, len), n, (i - 1.5) * 1.2);
       ctx.beginPath();
-      ctx.moveTo(add(base, n, -w / 4).x, add(base, n, -w / 4).y);
+      ctx.moveTo(...xy(add(base, n, -w / 4)));
       ctx.lineTo(tip.x, tip.y);
-      ctx.lineTo(add(base, n, w / 4).x, add(base, n, w / 4).y);
+      ctx.lineTo(...xy(add(base, n, w / 4)));
       ctx.closePath();
       ctx.fill();
     }
@@ -1311,24 +1313,11 @@ function drawSkirtLayer(
     // Lace pattern: small arcs, clipped to the layer
     ctx.save();
     ctx.beginPath();
-    hull.forEach((p, i) => {
-      if (i) ctx.lineTo(p.x, p.y);
-      else ctx.moveTo(p.x, p.y);
-    });
-    ctx.closePath();
+    polyPath(ctx, hull);
     ctx.clip();
     ctx.strokeStyle = C.laceHi;
     ctx.lineWidth = 0.6;
-    let x0 = Infinity,
-      x1 = -Infinity,
-      y0 = Infinity,
-      y1 = -Infinity;
-    for (const p of hull) {
-      x0 = Math.min(x0, p.x);
-      x1 = Math.max(x1, p.x);
-      y0 = Math.min(y0, p.y);
-      y1 = Math.max(y1, p.y);
-    }
+    const { x0, x1, y0, y1 } = bbox(hull);
     // One path for all scallops: moveTo starts each arc as its own subpath (no connecting
     // lines), so a single stroke draws the whole pattern.
     ctx.beginPath();
@@ -1356,66 +1345,48 @@ function drawMiniSkirt(ctx: CanvasRenderingContext2D, sk: Skeleton, hem: number[
   drawSkirtLayer(ctx, sk, hem, 0.2, 8.4, C.velvet, 3, 2.9, false);
 }
 
-function drawTorso(ctx: CanvasRenderingContext2D, sk: Skeleton): void {
+/**
+ * Point on the torso `d` up the spine and `o` towards the front, and draws the neck.
+ * The shoulders' offset from the rigid torso line (the walk's chest compensation) is spread
+ * along the spine, so the waist follows the hip and the bust the shoulders.
+ */
+function torsoFrame(ctx: CanvasRenderingContext2D, sk: Skeleton): (d: number, o: number) => Vec2 {
   const td = upDir(sk.torso);
   const tp = perpOf(td); // +tp = front side
-  // Where the shoulders sit off the rigid torso line (the walk's chest compensation) –
-  // spread along the spine, so the waist follows the hip and the bust the shoulders.
   const flex = sub(sk.shoulder, add(sk.hip, td, SK.torso));
-  const at = (d: number, o: number) => add(add(add(sk.hip, td, d), tp, o), flex, d / SK.torso);
-
-  // Neck
   stroke(ctx, add(sk.shoulder, td, -2), add(sk.neck, td, 3), 5, C.skin);
+  return (d, o) => add(add(add(sk.hip, td, d), tp, o), flex, d / SK.torso);
+}
+
+function drawTorso(ctx: CanvasRenderingContext2D, sk: Skeleton): void {
+  const at = torsoFrame(ctx, sk);
 
   // Velvet top with bust and waist
-  ctx.fillStyle = C.velvet;
-  ctx.beginPath();
-  const pts = [
-    at(SK.torso, -6.5),
-    at(SK.torso - 1, 4.5),
-    at(27, 8.2),
-    at(22, 6.4),
-    at(14, 5.2),
-    at(2, 7),
-    at(2, -7.5),
-    at(14, -5.4),
-    at(26, -6.4),
-  ];
-  pts.forEach((p, i) => {
-    if (i) ctx.lineTo(p.x, p.y);
-    else ctx.moveTo(p.x, p.y);
-  });
-  ctx.closePath();
-  ctx.fill();
+  fillPoly(
+    ctx,
+    [
+      at(SK.torso, -6.5),
+      at(SK.torso - 1, 4.5),
+      at(27, 8.2),
+      at(22, 6.4),
+      at(14, 5.2),
+      at(2, 7),
+      at(2, -7.5),
+      at(14, -5.4),
+      at(26, -6.4),
+    ],
+    C.velvet,
+  );
 
   // Neckline with lace trim
   fillPoly(ctx, [at(SK.torso + 0.5, -1.5), at(SK.torso, 4.6), at(30.5, 7.4), at(30, 1.6)], C.skin);
-  ctx.strokeStyle = C.lace;
-  ctx.lineWidth = 1.8;
   ctx.beginPath();
-  const n1 = at(30, 1.2);
-  const n2 = at(30.4, 7.8);
-  ctx.moveTo(n1.x, n1.y);
-  ctx.lineTo(n2.x, n2.y);
-  ctx.stroke();
-  ctx.strokeStyle = C.laceHi;
-  ctx.lineWidth = 0.7;
-  ctx.setLineDash([0.7, 0.8]);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  polyPath(ctx, [at(30, 1.2), at(30.4, 7.8)], false);
+  laceStroke(ctx, 1.8, 0.7, [0.7, 0.8]);
 
   // Corset with front lacing
   fillPoly(ctx, [at(22, 6.8), at(13.5, 5.6), at(3, 7.4), at(3, -7.8), at(13.5, -5.8), at(22, -6.8)], C.corset);
-  ctx.strokeStyle = 'rgba(80, 70, 90, 0.5)';
-  ctx.lineWidth = 0.5;
-  for (const o of [-3.5, 0, 3]) {
-    const a = at(21, o);
-    const b = at(4, o * 1.1);
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.stroke();
-  }
+  for (const o of [-3.5, 0, 3]) stroke(ctx, at(21, o), at(4, o * 1.1), 0.5, 'rgba(80, 70, 90, 0.5)');
   ctx.strokeStyle = C.lacing;
   ctx.lineWidth = 0.6;
   for (let d = 5; d < 21; d += 2.8) {
@@ -1432,14 +1403,7 @@ function drawTorso(ctx: CanvasRenderingContext2D, sk: Skeleton): void {
     ctx.stroke();
   }
   // Velvet sheen along the front edge
-  ctx.strokeStyle = C.velvetHi;
-  ctx.lineWidth = 0.9;
-  ctx.beginPath();
-  const g1 = at(29, 7.4);
-  const g2 = at(23, 6.2);
-  ctx.moveTo(g1.x, g1.y);
-  ctx.lineTo(g2.x, g2.y);
-  ctx.stroke();
+  stroke(ctx, at(29, 7.4), at(23, 6.2), 0.9, C.velvetHi);
 
   drawChoker(ctx, sk, false);
 }
@@ -1470,12 +1434,8 @@ function drawChoker(ctx: CanvasRenderingContext2D, sk: Skeleton, red: boolean): 
  * trim, boning and front lacing.
  */
 function drawCorsetTop(ctx: CanvasRenderingContext2D, sk: Skeleton): void {
-  const td = upDir(sk.torso);
-  const flex = sub(sk.shoulder, add(sk.hip, td, SK.torso));
-  const tp = perpOf(td);
-  const at = (d: number, o: number) => add(add(add(sk.hip, td, d), tp, o), flex, d / SK.torso);
+  const at = torsoFrame(ctx, sk);
 
-  stroke(ctx, add(sk.shoulder, td, -2), add(sk.neck, td, 3), 5, C.skin);
   // Shoulders and décolleté
   fillPoly(ctx, [at(SK.torso + 0.5, -6.6), at(SK.torso, 4.2), at(30, 7.6), at(27, 8.4), at(25.5, -6.6)], C.skin);
   stroke(ctx, at(31.5, 2.2), at(29.4, 3.4), 0.5, C.skinLine); // collarbone
@@ -1496,19 +1456,9 @@ function drawCorsetTop(ctx: CanvasRenderingContext2D, sk: Skeleton): void {
   stroke(ctx, at(28.4, 5.2), at(SK.torso + 0.3, 1.4), 0.7, C.corset);
   stroke(ctx, at(26.4, -4.4), at(SK.torso + 0.3, -1.6), 0.7, C.corset);
   // Lace trim along the top edge
-  ctx.strokeStyle = C.lace;
-  ctx.lineWidth = 1.5;
   ctx.beginPath();
-  for (const [i, p] of [at(25.8, -6.6), at(27.2, 1), at(28.6, 8.6)].entries()) {
-    if (i) ctx.lineTo(p.x, p.y);
-    else ctx.moveTo(p.x, p.y);
-  }
-  ctx.stroke();
-  ctx.strokeStyle = C.laceHi;
-  ctx.lineWidth = 0.6;
-  ctx.setLineDash([0.7, 0.8]);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  polyPath(ctx, [at(25.8, -6.6), at(27.2, 1), at(28.6, 8.6)], false);
+  laceStroke(ctx, 1.5, 0.6, [0.7, 0.8]);
   // Boning
   for (const o of [-3.5, 0, 2.6]) stroke(ctx, at(25, o), at(4, o * 1.1), 0.5, 'rgba(80, 70, 90, 0.5)');
   // Front lacing, as on the classic corset

@@ -86,7 +86,7 @@ export function stepAirborne(
   dt: number,
   platforms: readonly Platform[],
   physics: Pick<PhysicsConfig, 'gravity' | 'maxFallSpeed'>,
-  canLand: (p: Platform) => boolean = () => true,
+  canLand: (p: Platform) => boolean,
 ): Platform | null {
   const prevY = body.pos.y;
   body.vel.y = Math.min(body.vel.y + physics.gravity * dt, physics.maxFallSpeed);

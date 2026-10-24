@@ -1,5 +1,5 @@
 import { Engine, type PagegeistInstance } from './core/Engine';
-import { DEFAULT_SIZE, type PagegeistOptions } from './core/options';
+import type { PagegeistOptions } from './core/options';
 
 /**
  * Creates the mascot and mounts it immediately.
@@ -14,9 +14,7 @@ import { DEFAULT_SIZE, type PagegeistOptions } from './core/options';
  * pagegeist.destroy();
  */
 export function createPagegeist(options: PagegeistOptions = {}): PagegeistInstance {
-  const size = options.size;
-  // An invalid size (NaN, <= 0, Infinity) would break all geometry: fall back to the default.
-  return new Engine(size === undefined || (size > 0 && size < 1 / 0) ? options : { ...options, size: DEFAULT_SIZE });
+  return new Engine(options);
 }
 
 export type { PagegeistInstance } from './core/Engine';

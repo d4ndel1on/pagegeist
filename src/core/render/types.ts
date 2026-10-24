@@ -48,8 +48,6 @@ export type Mood = 'neutral' | 'happy' | 'annoyed' | 'surprised';
 export interface MascotMetrics {
   /** Standing height in CSS pixels (sole to crown). */
   height: number;
-  /** Approximate width (hitbox fallback). */
-  width: number;
   /**
    * Distance hands → soles when hanging with straight arms. Physics sets
    * `feet = grip + (0, hangReach)` while hanging.

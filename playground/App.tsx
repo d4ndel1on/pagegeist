@@ -16,7 +16,7 @@ import {
   type TextLineMode,
 } from '@d4ndel1on/pagegeist';
 import { Pagegeist, type PagegeistHandle } from '@d4ndel1on/pagegeist/react';
-import { type JSX, lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { type JSX, lazy, type RefObject, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * The gait lab tweaks internal (non-public) tuning constants. It is only loaded on the dev
@@ -105,7 +105,7 @@ export function App(): JSX.Element {
       if (key === 'd') setDebug((d) => !d);
       else if (key === 'p') togglePause(ref.current);
       else if (key === 'r') ref.current?.respawn();
-      else if (key === 's') setTimeScale((t) => (t === 1 ? 0.25 : 1));
+      else if (key === 's') setTimeScale(toggleSlowMo);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -185,7 +185,7 @@ export function App(): JSX.Element {
         onStateChange={({ to }) => setState(to)}
         onLand={onLand}
       />
-      <Page />
+      <Page geist={ref} />
 
       {!panelOpen && (
         <button
@@ -227,11 +227,11 @@ export function App(): JSX.Element {
             <button type="button" onClick={() => ref.current?.respawn()} title="respawn() · Key R">
               Summon
             </button>
-            <button type="button" onClick={() => setTimeScale((t) => (t === 1 ? 0.25 : 1))} title="Key S">
+            <button type="button" onClick={() => setTimeScale(toggleSlowMo)} title="Key S">
               Slow-mo
             </button>
           </div>
-          <p className="panel__stats panel__keys">Keys: {SHORTCUTS}</p>
+          <p className="panel__hint panel__keys">Keys: {SHORTCUTS}</p>
           <form
             className="panel__row"
             onSubmit={(e) => {
@@ -356,7 +356,7 @@ export function App(): JSX.Element {
                 type="button"
                 onClick={() => {
                   setDebug(true);
-                  setTimeScale(0.25);
+                  setTimeScale(SLOW_MO);
                 }}
               >
                 Debug + slow-mo
@@ -391,6 +391,9 @@ export function App(): JSX.Element {
     </>
   );
 }
+
+const SLOW_MO = 0.25;
+const toggleSlowMo = (t: number) => (t === 1 ? SLOW_MO : 1);
 
 function togglePause(g: PagegeistHandle | null): void {
   if (g?.paused) g.resume();
@@ -532,7 +535,15 @@ function BaitButton() {
   );
 }
 
-function Page() {
+const DOCS_URL = `${REPO_URL}/blob/main/docs`;
+
+/** Every button does something: links into the docs, or a reaction from her. */
+function Page({ geist }: { geist: RefObject<PagegeistHandle | null> }) {
+  const say = (text: string) => geist.current?.say(text);
+  const summon = (text: string) => {
+    geist.current?.respawn();
+    say(text);
+  };
   return (
     <>
       <nav className="nav">
@@ -560,12 +571,12 @@ function Page() {
           complain, but the page stays fully usable.
         </p>
         <div className="hero__actions">
-          <button type="button" className="btn btn--primary">
+          <a className="btn btn--primary" href={`${REPO_URL}#install`}>
             Get started
-          </button>
-          <button type="button" className="btn">
-            Learn more
-          </button>
+          </a>
+          <a className="btn" href="#how-it-works">
+            How she works
+          </a>
           <BaitButton />
         </div>
       </header>
@@ -588,23 +599,23 @@ function Page() {
           <article className="card">
             <h2>Platforms</h2>
             <p>Every card's top edge is a one-way platform. She jumps through from below and lands from above.</p>
-            <button type="button" className="btn btn--small">
+            <a className="btn btn--small" href={`${DOCS_URL}/guide.md#platforms`}>
               Details
-            </button>
+            </a>
           </article>
           <article className="card">
             <h2>Edges</h2>
             <p>Too high to jump? She grabs the edge, hangs for a moment and pulls herself up.</p>
-            <button type="button" className="btn btn--small">
+            <a className="btn btn--small" href={`${DOCS_URL}/guide.md#what-she-does`}>
               Details
-            </button>
+            </a>
           </article>
           <article className="card">
             <h2>Depth</h2>
             <p>Shadows and sorted body layers create spatial depth on a flat canvas.</p>
-            <button type="button" className="btn btn--small">
+            <a className="btn btn--small" href={`${DOCS_URL}/character.md`}>
               Details
-            </button>
+            </a>
           </article>
         </section>
 
@@ -617,13 +628,13 @@ function Page() {
             </p>
           </div>
           <div className="button-stack">
-            <button type="button" className="btn">
+            <button type="button" className="btn" onClick={() => say('One step at a time. Mine.')}>
               First step
             </button>
-            <button type="button" className="btn">
+            <button type="button" className="btn" onClick={() => say("Higher. I'm not carrying you.")}>
               Second step
             </button>
-            <button type="button" className="btn btn--primary">
+            <button type="button" className="btn btn--primary" onClick={() => summon('Fine. I am coming.')}>
               Top
             </button>
           </div>
@@ -660,7 +671,7 @@ function Page() {
               When she lands on an element it fires <code>pagegeist:land</code> – and <code>onLand</code> – for little
               easter eggs.
             </p>
-            <button type="button" className="btn btn--small">
+            <button type="button" className="btn btn--small" onClick={() => summon('Watch me land.')}>
               Try it
             </button>
           </article>

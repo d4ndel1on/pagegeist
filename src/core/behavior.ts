@@ -70,23 +70,18 @@ function hangOwnEdge(m: Mascot, p: Platform): Plan | null {
 }
 
 function drop(m: Mascot, p: Platform): Plan | null {
-  const view = m.viewport();
+  const view = m.world.viewport();
   const side = m.rng.chance(0.5) ? 'left' : 'right';
   const edgeX = side === 'left' ? p.left + 3 : p.right - 3;
   if (edgeX < view.left + 20 || edgeX > view.right - 20) return null;
   return { walkToX: edgeX, next: { type: 'drop', side }, label: `drop ${side}` };
 }
 
-interface Candidate {
-  weight: number;
-  value: Plan;
-}
-
 function jumpToNeighbor(m: Mascot, p: Platform): Plan | null {
   const reach = m.metrics.hangReach;
   const { maxJumpDistance, maxJumpUp, maxGrabJump } = m.physics;
   const allowGrab = m.behaviors.hang && m.motion === 'full';
-  const candidates: Candidate[] = [];
+  const candidates: Array<{ weight: number; value: Plan }> = [];
 
   for (const q of m.world.all) {
     if (q.id === p.id || q.right - q.left < 34) continue;
@@ -121,7 +116,7 @@ function jumpToNeighbor(m: Mascot, p: Platform): Plan | null {
 }
 
 /** Determine take-off and landing points between two platforms. */
-export function takeoffAndLanding(m: Mascot, p: Platform, q: Platform): { takeoffX: number; landX: number } | null {
+function takeoffAndLanding(m: Mascot, p: Platform, q: Platform): { takeoffX: number; landX: number } | null {
   const pL = p.left + 8;
   const pR = p.right - 8;
   const qL = q.left + 14;

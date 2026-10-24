@@ -252,9 +252,8 @@ const DEFAULT_PAUSE_CONTROL: PauseControlOptions = {
  * Nested objects are merged per key into fresh objects; the frozen defaults are never mutated.
  */
 export function resolveOptions(options: PagegeistOptions, base?: ResolvedOptions): ResolvedOptions {
-  const prev = base;
   const pick = <K extends keyof ResolvedOptions>(key: K, fallback: ResolvedOptions[K]): ResolvedOptions[K] =>
-    prev ? prev[key] : fallback;
+    base ? base[key] : fallback;
   const pc = options.pauseControl;
   return {
     zIndex: Math.round(finite(options.zIndex ?? pick('zIndex', 9999), 9999)),

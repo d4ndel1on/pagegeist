@@ -1,8 +1,9 @@
+import { decide } from './behavior';
 import type { Mascot } from './Mascot';
 import type { State } from './StateMachine';
 import { clamp, lerp, MascotState, smoothstep } from './types';
 
-type S = State<Mascot, MascotState>;
+type S = State<Mascot>;
 
 /** Airborne step; returns true if she landed (and already switched state). */
 function airborne(m: Mascot, dt: number): boolean {
@@ -37,7 +38,7 @@ const IDLE: S = {
     m.watchCursor(dt, true);
     m.maybeChatter(dt);
     if (m.fsm.time < m.idleUntil) return;
-    const plan = m.decide();
+    const plan = decide(m);
     if (plan) {
       m.plan = plan;
       m.fsm.transition(MascotState.WALK);
@@ -71,14 +72,14 @@ const WALK: S = {
         const q = m.world.get(next.platformId);
         if (!q) return m.fsm.transition(MascotState.IDLE);
         const landX = clamp(next.landX, q.left + 10, q.right - 10);
-        m.startJump({ x: landX, y: q.top }, 'land', q.top < p.top ? 28 : 36);
+        m.startJump({ x: landX, y: q.top }, q.top < p.top ? 28 : 36);
         return;
       }
       case 'grab': {
         const q = m.world.get(next.platformId);
         if (!q) return m.fsm.transition(MascotState.IDLE);
         const ax = q.left + next.anchorOffsetX;
-        m.startJump({ x: ax, y: q.top + m.metrics.hangReach }, 'grab', 10, {
+        m.startJump({ x: ax, y: q.top + m.metrics.hangReach }, 10, {
           platformId: q.id,
           offsetX: next.anchorOffsetX,
         });
@@ -115,13 +116,13 @@ const JUMP: S = {
     j.airTime += dt;
     if (Math.abs(m.body.vel.x) > 20) m.facing = m.body.vel.x > 0 ? 1 : -1;
 
-    if (j.intent === 'grab' && j.grab && j.solution && j.airTime >= j.solution.duration) {
+    if (j.grab && j.solution && j.airTime >= j.solution.duration) {
       const q = m.world.get(j.grab.platformId);
       if (q) {
         m.attachHang(q, j.grab.offsetX);
         return;
       }
-      j.intent = 'land';
+      j.grab = null;
     }
     if (airborne(m, dt)) return;
     if (j.solution && j.airTime > j.solution.duration + 0.4) m.fsm.transition(MascotState.FALL);

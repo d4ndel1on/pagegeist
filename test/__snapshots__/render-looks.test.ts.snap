@@ -1,53 +1,53 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`all looks over the pose sequence > classic-boots-bare 1`] = `"7a7f5b83:554421"`;
+exports[`all looks over the pose sequence > classic-boots-bare 1`] = `"b932c54c:555237"`;
 
-exports[`all looks over the pose sequence > classic-boots-fishnets 1`] = `"d67351f0:755408"`;
+exports[`all looks over the pose sequence > classic-boots-fishnets 1`] = `"16f3fd83:756224"`;
 
-exports[`all looks over the pose sequence > classic-heels-bare 1`] = `"3bc0b674:572951"`;
+exports[`all looks over the pose sequence > classic-heels-bare 1`] = `"4e55475:573767"`;
 
-exports[`all looks over the pose sequence > classic-heels-fishnets 1`] = `"ff68f511:773938"`;
+exports[`all looks over the pose sequence > classic-heels-fishnets 1`] = `"804e08ec:774754"`;
 
-exports[`all looks over the pose sequence > corset-boots-bare 1`] = `"d1820bdb:428846"`;
+exports[`all looks over the pose sequence > corset-boots-bare 1`] = `"b9d3af:427894"`;
 
-exports[`all looks over the pose sequence > corset-boots-fishnets 1`] = `"e1ce5f69:629769"`;
+exports[`all looks over the pose sequence > corset-boots-fishnets 1`] = `"54c53009:628817"`;
 
-exports[`all looks over the pose sequence > corset-heels-bare 1`] = `"76b98b6e:447359"`;
+exports[`all looks over the pose sequence > corset-heels-bare 1`] = `"4b8b5596:446407"`;
 
-exports[`all looks over the pose sequence > corset-heels-fishnets 1`] = `"4f50971e:648282"`;
+exports[`all looks over the pose sequence > corset-heels-fishnets 1`] = `"b5afbda:647330"`;
 
-exports[`classic look, extended poses > attitude (hand on hip) 1`] = `"59523758:118165"`;
+exports[`classic look, extended poses > attitude (hand on hip) 1`] = `"89b4a21a:118357"`;
 
-exports[`classic look, extended poses > blink 1`] = `"6376fff6:114385"`;
+exports[`classic look, extended poses > blink 1`] = `"f41c6c1a:114577"`;
 
-exports[`classic look, extended poses > calm idle 1`] = `"a0798031:117341"`;
+exports[`classic look, extended poses > calm idle 1`] = `"e2aa249d:117533"`;
 
-exports[`classic look, extended poses > climb 0 1`] = `"9efd0e51:106485"`;
+exports[`classic look, extended poses > climb 0 1`] = `"4c2d59fd:106677"`;
 
-exports[`classic look, extended poses > climb 0.5 1`] = `"d69e526d:141501"`;
+exports[`classic look, extended poses > climb 0.5 1`] = `"37c76af1:141693"`;
 
-exports[`classic look, extended poses > climb 0.25 1`] = `"29741b51:121285"`;
+exports[`classic look, extended poses > climb 0.25 1`] = `"ac5a7d3d:121477"`;
 
-exports[`classic look, extended poses > climb 0.75 1`] = `"c64b7e9d:132405"`;
+exports[`classic look, extended poses > climb 0.75 1`] = `"d1f2d559:132597"`;
 
-exports[`classic look, extended poses > climb 1 1`] = `"179e752d:115685"`;
+exports[`classic look, extended poses > climb 1 1`] = `"1c00b259:115877"`;
 
-exports[`classic look, extended poses > hair sway back 1`] = `"ac192781:126353"`;
+exports[`classic look, extended poses > hair sway back 1`] = `"e1c4875b:126545"`;
 
-exports[`classic look, extended poses > hair sway forward 1`] = `"2b24cb2d:135237"`;
+exports[`classic look, extended poses > hair sway forward 1`] = `"77cafd51:135429"`;
 
-exports[`classic look, extended poses > landing squash 1`] = `"849ae538:133846"`;
+exports[`classic look, extended poses > landing squash 1`] = `"a6ac7cfc:134038"`;
 
-exports[`classic look, extended poses > look at cursor ahead 1`] = `"6583eb57:118257"`;
+exports[`classic look, extended poses > look at cursor ahead 1`] = `"7c0a5af5:118449"`;
 
-exports[`classic look, extended poses > look at cursor behind 1`] = `"583121e:118253"`;
+exports[`classic look, extended poses > look at cursor behind 1`] = `"58cbab4a:118445"`;
 
-exports[`classic look, extended poses > look at cursor below 1`] = `"dcb3814f:118256"`;
+exports[`classic look, extended poses > look at cursor below 1`] = `"54476b09:118448"`;
 
-exports[`classic look, extended poses > mood annoyed 1`] = `"cb46df7c:114221"`;
+exports[`classic look, extended poses > mood annoyed 1`] = `"2f1c91bc:114413"`;
 
-exports[`classic look, extended poses > mood happy 1`] = `"45c01eb2:118201"`;
+exports[`classic look, extended poses > mood happy 1`] = `"b1c70de:118393"`;
 
-exports[`classic look, extended poses > mood neutral 1`] = `"c1a04d5a:118145"`;
+exports[`classic look, extended poses > mood neutral 1`] = `"c245961a:118337"`;
 
-exports[`classic look, extended poses > mood surprised 1`] = `"e9e60f4e:118161"`;
+exports[`classic look, extended poses > mood surprised 1`] = `"6cc64a62:118353"`;

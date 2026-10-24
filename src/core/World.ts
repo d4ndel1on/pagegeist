@@ -56,7 +56,7 @@ export class DomCollisionWorld {
     private safeArea: SafeAreaOptions,
   ) {}
 
-  /** Increases with every rescan – useful for caches. */
+  /** Increases whenever the platform list is rebuilt (rescan or scroll refresh). */
   get revision(): number {
     return this.version;
   }
@@ -99,11 +99,9 @@ export class DomCollisionWorld {
     };
     const opts: AddEventListenerOptions = { passive: true };
     window.addEventListener('scroll', scroll, opts);
-    window.addEventListener('resize', mark, opts);
     document.addEventListener('visibilitychange', visible);
     this.cleanup.push(() => {
       window.removeEventListener('scroll', scroll);
-      window.removeEventListener('resize', mark);
       document.removeEventListener('visibilitychange', visible);
     });
 
@@ -406,7 +404,6 @@ function lineRects(el: Element): Rectish[] {
   const rects = Array.from(range.getClientRects())
     .filter((r) => r.width > 1 && r.height > 1)
     .sort((a, b) => a.top - b.top);
-  range.detach();
 
   const lines: Rectish[] = [];
   for (const r of rects) {

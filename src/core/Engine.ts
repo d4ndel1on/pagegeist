@@ -43,7 +43,9 @@ const FOOT_TRACE_SECONDS = 2.5;
 /** A jump larger than this between two frames (px) is a teleport: the trace restarts. */
 const FOOT_TRACE_TELEPORT = 200;
 const FOOT_COLORS = { near: '#7ad7ff', far: '#ff6bcb' } as const;
-const CALLBACK_KEYS: Record<PagegeistEventName, keyof PagegeistCallbacks> = {
+/** Horizontal spawn point as a fraction of the viewport width; `'random'` has none. */
+const SPAWN_FRACTIONS: Partial<Record<string, number>> = { left: 0.15, center: 0.5, right: 0.85 };
+export const CALLBACK_KEYS: Record<PagegeistEventName, keyof PagegeistCallbacks> = {
   stateChange: 'onStateChange',
   land: 'onLand',
   poke: 'onPoke',
@@ -133,8 +135,9 @@ export class Engine implements PagegeistInstance {
     this.setCallbacks(options);
     this._paused = options.paused ?? false;
 
+    // An invalid size (NaN, <= 0, Infinity) would break all geometry: fall back to the default.
     const size = options.size ?? DEFAULT_SIZE;
-    this.renderer = new GothRenderer(size);
+    this.renderer = new GothRenderer(size > 0 && size < 1 / 0 ? size : DEFAULT_SIZE);
     this.world = new DomCollisionWorld(this.options.platforms, this.options.safeArea);
     this.mascot = new Mascot(
       this.world,
@@ -203,8 +206,7 @@ export class Engine implements PagegeistInstance {
 
   say(text: string, options: { duration?: number } = {}): void {
     if (this.destroyed) return;
-    const t = String(text);
-    this.mascot.say(t, options.duration ?? Math.min(5, Math.max(2, 1.6 + t.length * 0.05)));
+    this.mascot.say(String(text), options.duration);
     this.redraw();
   }
 
@@ -307,6 +309,11 @@ export class Engine implements PagegeistInstance {
     this.emit(paused ? 'pause' : 'resume', {});
   }
 
+  /** Hitbox cursor while she is not being dragged. */
+  private get idleCursor(): string {
+    return this.options.behaviors.drag ? 'grab' : 'pointer';
+  }
+
   /** Forces a render of the next frame and wakes the loop if it sleeps (paused). */
   private redraw(): void {
     this.renderedRevision = -1;
@@ -314,23 +321,20 @@ export class Engine implements PagegeistInstance {
   }
 
   private spawnX(spawn: NonNullable<PagegeistOptions['spawn']>): number | null {
-    const fraction = { left: 0.15, center: 0.5, right: 0.85, random: null }[spawn as string];
-    const f = typeof spawn === 'number' ? spawn : fraction;
-    if (f === null || f === undefined) return null;
+    const f = typeof spawn === 'number' ? spawn : SPAWN_FRACTIONS[spawn];
+    if (f === undefined) return null;
     const v = this.world.viewport();
     return v.left + (v.right - v.left) * Math.min(0.95, Math.max(0.05, f));
   }
 
   private watchReducedMotion(): void {
     const query = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    if (!query) {
-      this.applyMotion();
-      return;
+    if (query) {
+      this.reducedMotionQuery = query;
+      const onChange = () => this.applyMotion();
+      query.addEventListener?.('change', onChange);
+      this.cleanup.push(() => query.removeEventListener?.('change', onChange));
     }
-    this.reducedMotionQuery = query;
-    const onChange = () => this.applyMotion();
-    query.addEventListener?.('change', onChange);
-    this.cleanup.push(() => query.removeEventListener?.('change', onChange));
     this.applyMotion();
   }
 
@@ -367,7 +371,7 @@ export class Engine implements PagegeistInstance {
     Object.assign(this.hitbox.style, {
       zIndex: String(z + 1),
       pointerEvents: interactive ? 'auto' : 'none',
-      cursor: this.options.behaviors.drag ? 'grab' : 'pointer',
+      cursor: this.idleCursor,
     } satisfies Partial<CSSStyleDeclaration>);
   }
 
@@ -539,7 +543,7 @@ export class Engine implements PagegeistInstance {
   private endDrag(): void {
     const d = this.drag;
     this.drag = null;
-    this.hitbox.style.cursor = this.options.behaviors.drag ? 'grab' : 'pointer';
+    this.hitbox.style.cursor = this.idleCursor;
     if (d && this.hitbox.hasPointerCapture?.(d.pointerId)) this.hitbox.releasePointerCapture(d.pointerId);
     if (this.restoreUserSelect !== null) {
       document.documentElement.style.userSelect = this.restoreUserSelect;
@@ -783,23 +787,19 @@ export class Engine implements PagegeistInstance {
 
   private placeHitbox(rs: RenderState, x: number, y: number): Rect {
     const b = this.renderer.bounds(rs);
-    this.positionHitbox(x + b.x, y + b.y, b.width, b.height);
-    return b;
-  }
-
-  private positionHitbox(x: number, y: number, w: number, h: number): void {
     // A little padding makes her easier to grab.
     const pad = 6 * (this.renderer.metrics.height / DEFAULT_SIZE);
-    const rx = x - pad;
-    const ry = y - pad;
-    const rw = Math.round(w + pad * 2);
-    const rh = Math.round(h + pad * 2);
+    const rx = x + b.x - pad;
+    const ry = y + b.y - pad;
+    const rw = Math.round(b.width + pad * 2);
+    const rh = Math.round(b.height + pad * 2);
     if (rw !== this.hitboxRect.w || rh !== this.hitboxRect.h) {
       this.hitbox.style.width = `${rw}px`;
       this.hitbox.style.height = `${rh}px`;
     }
     this.hitboxRect = { x: rx, y: ry, w: rw, h: rh };
     this.hitbox.style.transform = `translate(${rx.toFixed(1)}px, ${ry.toFixed(1)}px)`;
+    return b;
   }
 
   private drawDebug(c: CanvasRenderingContext2D, sx: number, sy: number, x: number, y: number, b: Rect): void {

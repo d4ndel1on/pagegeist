@@ -180,7 +180,7 @@ code {
   box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.8);
   transition:
     transform 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color 0.2s ease;
 }
 
 .card--tall {
@@ -331,7 +331,8 @@ code {
 .panel,
 .panel-toggle {
   position: fixed;
-  z-index: 10001;
+  /* Below her canvas (zIndex 9999), so she and her bubbles stay visible over the sidebar. */
+  z-index: 9998;
   font:
     12px / 1.4 ui-monospace,
     SFMono-Regular,
@@ -548,7 +549,7 @@ code {
   font-variant-numeric: tabular-nums;
 }
 
-.panel__stats {
+.panel__hint {
   margin: 0;
   color: #a69cb3;
 }

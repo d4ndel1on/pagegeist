@@ -20,7 +20,7 @@ const platform = (id: string, left: number, right: number, top: number): Platfor
 function simulate(from: { x: number; y: number }, vx: number, vy: number, duration: number) {
   const body = { pos: { ...from }, vel: { x: vx, y: vy } };
   const dt = 1 / 1200;
-  for (let t = 0; t < duration - dt / 2; t += dt) stepAirborne(body, dt, [], physics);
+  for (let t = 0; t < duration - dt / 2; t += dt) stepAirborne(body, dt, [], physics, () => true);
   return body.pos;
 }
 
@@ -44,7 +44,7 @@ describe('solveJump', () => {
 describe('stepAirborne', () => {
   it('lands on a platform when falling through its top edge', () => {
     const body = { pos: { x: 50, y: 95 }, vel: { x: 0, y: 600 } };
-    const landed = stepAirborne(body, 1 / 60, [platform('a', 0, 100, 100)], physics);
+    const landed = stepAirborne(body, 1 / 60, [platform('a', 0, 100, 100)], physics, () => true);
     expect(landed?.id).toBe('a');
     expect(body.pos.y).toBe(100);
     expect(body.vel).toEqual({ x: 0, y: 0 });
@@ -52,12 +52,18 @@ describe('stepAirborne', () => {
 
   it('passes through platforms while moving upwards (one-way)', () => {
     const body = { pos: { x: 50, y: 105 }, vel: { x: 0, y: -900 } };
-    expect(stepAirborne(body, 1 / 60, [platform('a', 0, 100, 100)], physics)).toBeNull();
+    expect(stepAirborne(body, 1 / 60, [platform('a', 0, 100, 100)], physics, () => true)).toBeNull();
   });
 
   it('picks the highest platform crossed in one step', () => {
     const body = { pos: { x: 50, y: 90 }, vel: { x: 0, y: 1500 } };
-    const landed = stepAirborne(body, 1 / 30, [platform('low', 0, 100, 130), platform('high', 0, 100, 100)], physics);
+    const landed = stepAirborne(
+      body,
+      1 / 30,
+      [platform('low', 0, 100, 130), platform('high', 0, 100, 100)],
+      physics,
+      () => true,
+    );
     expect(landed?.id).toBe('high');
   });
 

@@ -79,29 +79,28 @@ export function wrapText(measure: (s: string) => number, text: string, maxWidth:
 }
 
 /** Last wrapped bubble – the text rarely changes, so wrapping/measuring runs once per phrase. */
-let bubbleCache: { text: string; font: string; maxWidth: number; lines: string[]; width: number } | null = null;
+let bubbleCache: { text: string; maxWidth: number; lines: string[]; width: number } | null = null;
 
-/** Wrapped lines and their widest width, cached per (text, font, maxWidth). */
+/** Wrapped lines and their widest width, cached per (text, maxWidth). */
 export function bubbleLayout(
   ctx: CanvasRenderingContext2D,
   text: string,
-  font: string = BUBBLE_FONT,
   maxWidth: number = BUBBLE_MAX_WIDTH,
 ): { lines: string[]; width: number } {
   const c = bubbleCache;
-  if (c && c.text === text && c.font === font && c.maxWidth === maxWidth) return c;
-  ctx.font = font;
+  if (c && c.text === text && c.maxWidth === maxWidth) return c;
+  ctx.font = BUBBLE_FONT;
   const measure = (s: string) => ctx.measureText(s).width;
   const lines = wrapText(measure, text, maxWidth);
-  bubbleCache = { text, font, maxWidth, lines, width: Math.max(...lines.map(measure)) };
+  bubbleCache = { text, maxWidth, lines, width: Math.max(...lines.map(measure)) };
   return bubbleCache;
 }
 
 /**
  * Speech bubble drawn on the canvas. Text is only ever passed to fillText – it is never
- * parsed as HTML, so phrases cannot inject markup. `viewWidth` (CSS px) keeps the bubble
- * inside the viewport; by default it is derived from the canvas size and transform scale,
- * which – unlike `clientWidth` – never forces a layout.
+ * parsed as HTML, so phrases cannot inject markup. The bubble stays inside the viewport,
+ * whose width is derived from the canvas size and transform scale – unlike `clientWidth`,
+ * that never forces a layout.
  */
 export function drawSpeechBubble(
   ctx: CanvasRenderingContext2D,
@@ -109,7 +108,6 @@ export function drawSpeechBubble(
   y: number,
   text: string,
   alpha: number,
-  viewWidth?: number,
 ): void {
   ctx.globalAlpha = alpha;
   const padX = 10;
@@ -118,7 +116,7 @@ export function drawSpeechBubble(
   const { lines, width } = bubbleLayout(ctx, text);
   const w = Math.ceil(width) + padX * 2;
   const h = lines.length * LINE_HEIGHT + padY * 2 + 2;
-  const vw = viewWidth ?? ctx.canvas.width / (ctx.getTransform?.().a || 1);
+  const vw = ctx.canvas.width / (ctx.getTransform?.().a || 1);
   const left = Math.max(6, Math.min(x - w / 2, vw - w - 6));
   const top = Math.max(6, y - h - 10);
   ctx.fillStyle = 'rgba(18, 13, 24, 0.92)';

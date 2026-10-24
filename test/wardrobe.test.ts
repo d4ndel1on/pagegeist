@@ -100,7 +100,9 @@ function hash(log: unknown[]): string {
 
 describe('default outfit is unchanged', () => {
   // Hash changed with the posed hands, the batched lace pattern and the paler, ghostlier
-  // skin (owner-approved; the skin change only swaps the two skin colors).
+  // skin (owner-approved; the skin change only swaps the two skin colors). The drawing-helper
+  // refactor in 0.1.2 only reordered style assignments: every paint call runs with the same
+  // path and style as before.
   it('matches the golden hash of the classic look', () => {
     const log = drawLog(new GothRenderer(HEIGHT));
     expect(log.length).toBeGreaterThan(100);

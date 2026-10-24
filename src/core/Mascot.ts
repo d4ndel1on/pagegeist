@@ -1,4 +1,4 @@
-import { decide, type Plan } from './behavior';
+import type { Plan } from './behavior';
 import { cycleLength, GAIT, walkSpeed } from './gait';
 import type { PagegeistEventMap, PagegeistEventName, PhraseTrigger, ResolvedOptions } from './options';
 import { resolvePhrase } from './phrases';
@@ -9,9 +9,9 @@ import { SWAY, WALK } from './render/walk';
 import { StateMachine } from './StateMachine';
 import { MASCOT_STATES } from './states';
 import { clamp, type Facing, lerp, MascotState, type Platform, spring, type Vec2, wobble } from './types';
-import type { DomCollisionWorld, Viewport } from './World';
+import type { DomCollisionWorld } from './World';
 
-export interface HangInfo {
+interface HangInfo {
   platformId: string;
   /** Grip point relative to platform.left (moves along with the element). */
   offsetX: number;
@@ -22,8 +22,7 @@ export interface HangInfo {
   until: number;
 }
 
-export interface JumpInfo {
-  intent: 'land' | 'grab';
+interface JumpInfo {
   target: Vec2;
   clearance: number;
   grab: { platformId: string; offsetX: number } | null;
@@ -39,7 +38,7 @@ export interface JumpInfo {
  */
 export type MotionLevel = 'full' | 'calm' | 'static';
 
-export type Emit = <K extends PagegeistEventName>(type: K, event: PagegeistEventMap[K]) => void;
+type Emit = <K extends PagegeistEventName>(type: K, event: PagegeistEventMap[K]) => void;
 
 const CROUCH_TIME = 0.13;
 const OCCUPIED_ATTRIBUTE = 'data-pagegeist-occupied';
@@ -131,7 +130,7 @@ export class Mascot {
 
   /** Drop into the visible area from above (or appear on a platform when static). */
   respawn(spawnX: number | null = null): void {
-    const v = this.viewport();
+    const v = this.world.viewport();
     this.leaveGround();
     this.hang = null;
     this.jump = null;
@@ -162,10 +161,6 @@ export class Mascot {
     this.prevPos = { ...this.body.pos };
     if (this.fsm.current !== MascotState.IDLE) this.fsm.transition(MascotState.IDLE);
     return true;
-  }
-
-  viewport(): Viewport {
-    return this.world.viewport();
   }
 
   update(dt: number): void {
@@ -269,9 +264,8 @@ export class Mascot {
 
   // ------------------------------------------------------------ Actions
 
-  startJump(target: Vec2, intent: 'land' | 'grab', clearance: number, grab: JumpInfo['grab'] = null): void {
+  startJump(target: Vec2, clearance: number, grab: JumpInfo['grab'] = null): void {
     this.jump = {
-      intent,
       target,
       clearance: clearance * this.physics.scale,
       grab,
@@ -303,7 +297,7 @@ export class Mascot {
   /** One airborne physics step; side screen edges act as walls. Returns the landing platform. */
   stepAir(dt: number): Platform | null {
     const landed = stepAirborne(this.body, dt, this.world.all, this.physics, (p) => this.canLand(p));
-    const v = this.viewport();
+    const v = this.world.viewport();
     if (this.body.pos.x < v.left + 12 || this.body.pos.x > v.right - 12) {
       this.body.pos.x = clamp(this.body.pos.x, v.left + 12, v.right - 12);
       this.body.vel.x *= -0.35;
@@ -360,7 +354,7 @@ export class Mascot {
       case MascotState.WALK:
       case MascotState.SIT_ON_ELEMENT: {
         const p = this.ground;
-        if (p) this.startJump({ x: this.body.pos.x, y: p.top }, 'land', 46);
+        if (p) this.startJump({ x: this.body.pos.x, y: p.top }, 46);
         break;
       }
       case MascotState.HANG_ON_EDGE:
@@ -396,8 +390,10 @@ export class Mascot {
     this.fsm.transition(MascotState.FALL);
   }
 
-  say(text: string, duration = 2.4, trigger: PhraseTrigger | 'api' = 'api'): void {
-    this.bubble = { text, born: this.time, until: this.time + duration };
+  /** Shows a speech bubble; by default longer texts stay up longer (2–5 s). */
+  say(text: string, duration?: number, trigger: PhraseTrigger | 'api' = 'api'): void {
+    const d = duration ?? clamp(1.6 + text.length * 0.05, 2, 5);
+    this.bubble = { text, born: this.time, until: this.time + d };
     this.lastChatAt = this.time;
     this.emit('say', { text, trigger });
   }
@@ -405,7 +401,7 @@ export class Mascot {
   /** Resolves and says a phrase for the trigger (if any). */
   speak(trigger: PhraseTrigger, element: Element | null, duration?: number): void {
     const text = resolvePhrase(this.options.phrases, { trigger, element, state: this.state }, this.rng);
-    if (text) this.say(text, duration ?? clamp(1.6 + text.length * 0.05, 2, 5), trigger);
+    if (text) this.say(text, duration, trigger);
   }
 
   /** Occasional unprompted remark while idling. */
@@ -487,11 +483,6 @@ export class Mascot {
     } else {
       this.cursorNearTime = 0;
     }
-  }
-
-  /** Used by IDLE to pick the next activity. */
-  decide(): Plan | null {
-    return decide(this);
   }
 
   // ------------------------------------------------------------ Secondary motion

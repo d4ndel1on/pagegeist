@@ -36,9 +36,6 @@ export const TOE: Vec2 = { x: 12.8, y: LEG.ankle };
 /** Heel tip (bottom of the stiletto) in the foot frame: the boot rocks on it right after contact. */
 export const HEEL: Vec2 = { x: -2.1, y: LEG.ankle };
 
-/** Sole centre relative to the toe pivot (part of the foot geometry; formerly the footprint stamp point). */
-export const PRINT_DX = -7.3;
-
 /** Scalar tuning of the cycle. Mutable on purpose (hand-tuning in the playground). */
 export const WALK: {
   /** Minimum knee flexion (rad) of the stance leg – the base hip height is solved from it. */

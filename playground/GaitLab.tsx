@@ -1,6 +1,4 @@
 // Gait lab: live-tunes INTERNAL walk-cycle constants (not part of the public API).
-// Only loaded on demand (dev server or `?lab` in the URL) via React.lazy, so the
-// regular playground bundle never imports these internals.
 import { type JSX, useState } from 'react';
 import { DEFAULT_GAIT, GAIT, type GaitTuning, walkSpeed } from '../src/core/gait';
 import { WALK } from '../src/core/render/walk';
@@ -55,7 +53,7 @@ export default function GaitLab({ size }: { size: number }): JSX.Element {
       {WALK_SLIDERS.map(([key, min, max, step]) => (
         <Slider key={key} label={key} min={min} max={max} step={step} value={walk[key]} onChange={setWalkValue} />
       ))}
-      <p className="panel__stats">
+      <p className="panel__hint">
         {Math.round(walkSpeed(size, gait))} px/s · {Math.round(gait.cadence * 60)} steps/min
       </p>
       <div className="panel__row">

@@ -9,10 +9,10 @@ import {
   useMemo,
   useRef,
 } from 'react';
+import { CALLBACK_KEYS } from '../core/Engine';
 import { type ResolvedOptions, resolveOptions } from '../core/options';
 import {
   createPagegeist,
-  type PagegeistCallbacks,
   type PagegeistEventMap,
   type PagegeistEventName,
   type PagegeistInstance,
@@ -78,9 +78,7 @@ interface HookState {
   subs: Set<Subscription>;
 }
 
-const CALLBACKS = 'StateChange Land Poke Grab Release Say Pause Resume'.split(' ').map((name) => `on${name}`) as Array<
-  keyof PagegeistCallbacks
->;
+const CALLBACKS = Object.values(CALLBACK_KEYS);
 
 /** Shallow equality; nested plain objects (behaviors, platforms, phrase maps…) compared by value. */
 function sameOptions(a: ResolvedOptions, b?: ResolvedOptions): boolean {

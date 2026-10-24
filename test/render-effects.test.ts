@@ -51,7 +51,7 @@ describe('speech bubble', () => {
     expect(calls(again.log, 'fillText')).toHaveLength(calls(log, 'fillText').length / 5);
     // A new phrase or width is laid out afresh.
     const other = recordingContext();
-    bubbleLayout(other.ctx, text, undefined, 50);
+    bubbleLayout(other.ctx, text, 50);
     expect(calls(other.log, 'measureText').length).toBeGreaterThan(0);
   });
 
@@ -90,11 +90,6 @@ describe('speech bubble', () => {
     drawSpeechBubble(ctx, 795, 300, 'edge', 1);
     const [, left, , w] = calls(log, 'roundRect')[0] as number[];
     expect(left! + w!).toBe(800 - 6);
-    // An explicit view width wins.
-    const narrow = recordingContext();
-    drawSpeechBubble(narrow.ctx, 795, 300, 'edge', 1, 300);
-    const [, l2, , w2] = calls(narrow.log, 'roundRect')[0] as number[];
-    expect(l2! + w2!).toBe(300 - 6);
     // And it never leaves the left edge.
     const left0 = recordingContext();
     drawSpeechBubble(left0.ctx, 0, 300, 'edge', 1);
