@@ -156,7 +156,7 @@ const greeted = useRef(false);
 
 ```html
 <script type="module">
-  import { createPagegeist } from 'https://esm.sh/@d4ndel1on/pagegeist@0.1.3';
+  import { createPagegeist } from 'https://esm.sh/@d4ndel1on/pagegeist@0.2.0';
   const pagegeist = createPagegeist({ size: 140, pauseControl: true });
 </script>
 ```
