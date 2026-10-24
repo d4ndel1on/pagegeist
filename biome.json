@@ -2,7 +2,21 @@
   "$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
   "vcs": { "enabled": false },
   "files": {
-    "includes": ["**", "!_prototype", "!dist", "!dist-playground", "!coverage", "!.idea", "!**/*.md", "!**/*.yml"]
+    "includes": [
+      "**",
+      "!_prototype",
+      "!dist",
+      "!dist-playground",
+      "!coverage",
+      "!.idea",
+      "!**/*.md",
+      "!**/*.yml",
+      "!test-results",
+      "!playwright-report",
+      "!examples/starters/*/.next",
+      "!examples/starters/*/dist",
+      "!**/next-env.d.ts"
+    ]
   },
   "formatter": {
     "enabled": true,

@@ -20,7 +20,9 @@ Node 24 (`.nvmrc`). Run `npm ci` once.
 |---|---|
 | `npm run ci` | The full gate CI runs: lint, typecheck, snippet check, tests, build, package checks, size budget, playground build. **Run before you call a change done.** |
 | `npm test` | Vitest (happy-dom), deterministic via `seeded()` randomness |
-| `npm run typecheck` | `tsc` over `src`, `test`, `playground`, plus `examples/` with its own tsconfig |
+| `npm run test:e2e` | Playwright smoke tests of `dist/` in Chromium, Firefox, WebKit and touch emulation (`npm run build` and `npx playwright install` first) |
+| `npm run test:starters` | Packs the tarball, installs it into `examples/starters/*` (Next.js, Vite, React), builds them and tests them in production and dev mode (`npm run build` first) |
+| `npm run typecheck` | `tsc` over `src`, `test`, `playground`, plus `examples/` and `e2e/` with their own tsconfigs |
 | `npm run format` | Biome auto-fix (formatting, imports) |
 | `npm run check:snippets` | Docs snippets must match `examples/`; `--fix` rewrites the docs |
 | `npm run size` | size-limit budget (needs `npm run build` first) |
@@ -46,7 +48,10 @@ Node 24 (`.nvmrc`). Run `npm ci` once.
   using the package read.
 - **Docs snippets** that users copy belong in `examples/` (type-checked) and are embedded with a
   `<!-- snippet: examples/x.tsx -->` marker. Edit the example file, then run
-  `node scripts/check-snippets.mjs --fix`.
+  `node scripts/check-snippets.mjs --fix`. The same applies to the starter apps: their
+  `app/layout.tsx`, `src/Layout.tsx` and `src/main.ts` are verbatim copies of examples (the
+  script's `COPIES` list). Starters depend on the npm release, not on the working tree; CI
+  installs the packed tarball into them with `--no-save`.
 - **Language**: code, comments, docs, commits and changesets are in English.
 
 ## Releases
@@ -66,8 +71,10 @@ src/core/options.ts     public option types (TSDoc!) and option resolution
 src/core/Engine.ts      lifecycle, loop, DOM overlay, PagegeistInstance
 src/core/render/        procedural character drawing (affects the golden hash)
 examples/               type-checked snippets embedded in README/docs/llms.txt
+examples/starters/      complete Next.js / React / Vite apps (StackBlitz demos, CI integration tests)
+e2e/                    Playwright: smoke.spec.ts (dist/ in real browsers), starters.spec.ts
 docs/                   user docs, shipped in the npm package
 playground/             demo app; playground/public/llms.txt, llms-full.txt is generated at build
-scripts/                check-dist.mjs, check-snippets.mjs
+scripts/                check-dist.mjs, check-snippets.mjs, build-starters.mjs
 test/                   Vitest
 ```

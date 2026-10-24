@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+  background: #15111c;
+  color: #ece6f5;
+  font:
+    18px / 1.6 system-ui,
+    sans-serif;
+}
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 8rem 1.5rem 4rem;
+}
+.card {
+  margin: 4rem 0;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #241d30;
+}
+button {
+  font: inherit;
+  padding: 0.5rem 1.5rem;
+}

@@ -1,0 +1,17 @@
+{
+  "name": "pagegeist-starter-vite",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@d4ndel1on/pagegeist": "^0.1.3"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vite": "8.3.5"
+  }
+}

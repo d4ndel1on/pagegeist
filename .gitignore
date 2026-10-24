@@ -2,6 +2,8 @@ node_modules/
 dist/
 dist-playground/
 coverage/
+test-results/
+playwright-report/
 *.tgz
 .DS_Store
 .idea/

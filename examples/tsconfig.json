@@ -5,5 +5,7 @@
     "isolatedDeclarations": false,
     "declaration": false
   },
-  "include": ["."]
+  "include": ["."],
+  // Full apps with their own dependencies and tsconfig.
+  "exclude": ["starters"]
 }

@@ -3,7 +3,7 @@
   "projectTitle": "pagegeist",
   "description": "Animated mascot overlay for web pages: a gothic poltergeist drawn on a canvas that walks on the page's headings, text and buttons. Zero dependencies, vanilla JS core plus an SSR-safe React adapter (Next.js App Router ready).",
   "folders": ["docs", "examples"],
-  "excludeFolders": ["src", "test", "playground", "scripts", ".changeset"],
+  "excludeFolders": ["src", "test", "e2e", "playground", "scripts", ".changeset", "examples/starters"],
   "excludeFiles": ["CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "AGENTS.md", "CLAUDE.md"],
   "rules": [
     "Install with `npm install @d4ndel1on/pagegeist`. React apps import `<Pagegeist />` from `@d4ndel1on/pagegeist/react`; everything else uses `createPagegeist()` from `@d4ndel1on/pagegeist`.",

@@ -35,7 +35,13 @@ Both entries are ESM-only and fully typed. Every option is optional; the default
 
 ## Copy-paste setups
 
-All snippets below are type-checked in CI (`examples/` in the repository).
+All snippets below are type-checked in CI (`examples/` in the repository). Complete, runnable
+apps built from them – also tested in CI against the packed package, in production and dev
+mode – live in [`examples/starters/`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters):
+[`next`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters/next) (App Router),
+[`react`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters/react) (Vite + React, StrictMode) and
+[`vite`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters/vite) (vanilla). Each opens on
+StackBlitz via `https://stackblitz.com/github/d4ndel1on/pagegeist/tree/main/examples/starters/<name>`.
 
 ### React
 

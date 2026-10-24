@@ -18,7 +18,15 @@ in production builds, only with `?lab` in the URL.
 
 ```sh
 npm run test:coverage   # Vitest with V8 coverage (text summary + HTML report in coverage/)
+npx playwright install  # once: browsers for the tests below
+npm run build && npm run test:e2e        # smoke tests of dist/ in Chromium, Firefox, WebKit + touch
+npm run build && npm run test:starters   # tarball installed into the Next.js / React / Vite starters
 ```
+
+Both browser suites also run in CI (jobs `browsers` and `starters`). If a browser does not
+start locally, run the suite in the official image instead, e.g.
+`podman run --rm -v "$PWD":/work -w /work mcr.microsoft.com/playwright:v1.64.1-noble npx playwright test`
+(the image version must match `@playwright/test`).
 
 ## Before you open a pull request
 
@@ -104,6 +112,8 @@ src/
 playground/           Vite + React demo app (deployed to GitHub Pages)
 scripts/              build helpers (check-dist.mjs: post-build dist sanity checks; check-snippets.mjs: docs snippets)
 examples/             type-checked snippets embedded in the docs
+  starters/           complete Next.js / React / Vite apps: StackBlitz demos and CI integration tests
+e2e/                  Playwright browser tests (smoke tests of dist/, starter apps)
 test/                 Vitest tests
 docs/                 documentation (shipped in the npm package)
 ```

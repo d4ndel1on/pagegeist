@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pagegeist smoke fixture</title>
+    <style>
+      body { margin: 0; padding: 120px 40px 40px; font: 18px/1.5 system-ui, sans-serif; background: #15111c; color: #eee; }
+      h1 { margin: 0 0 48px; font-size: 40px; }
+      .card { width: 320px; padding: 24px; margin: 0 0 48px; background: #241d30; border-radius: 12px; }
+      button { font: inherit; padding: 8px 24px; }
+    </style>
+  </head>
+  <body>
+    <h1 id="heading">She lives here now</h1>
+    <div class="card" id="card">
+      <p>A card with a line of text she can stand on.</p>
+      <button type="button" id="button">A button</button>
+    </div>
+    <p>Another paragraph, far enough below the heading to be its own platform.</p>
+    <!-- The tests create the mascot themselves via window.pagegeistLib (the built dist/index.js). -->
+    <script type="module">
+      window.pagegeistLib = await import('/dist/index.js');
+    </script>
+  </body>
+</html>

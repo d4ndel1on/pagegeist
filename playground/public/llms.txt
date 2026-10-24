@@ -28,4 +28,5 @@ Key rules: mount exactly one mascot; call `createPagegeist()` only in the browse
 - [The character](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/character.md): design, wardrobe options, artwork license
 - [README](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/README.md): overview
 - [Live demo](https://d4ndel1on.github.io/pagegeist/): interactive playground with every option
+- [Starter apps](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters): complete Next.js App Router, React + Vite and vanilla Vite apps, tested in CI against the package; open any of them on StackBlitz via https://stackblitz.com/github/d4ndel1on/pagegeist/tree/main/examples/starters/<next|react|vite>
 - [Source code](https://github.com/d4ndel1on/pagegeist) · [npm package](https://www.npmjs.com/package/@d4ndel1on/pagegeist) · [Changelog](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/CHANGELOG.md)

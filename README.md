@@ -66,6 +66,13 @@ Without a bundler, pin an exact version from a CDN:
 
 ## Quick start
 
+Try it without installing anything – each starter is a complete app, tested in CI against the
+package:
+
+[![React starter on StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/d4ndel1on/pagegeist/tree/main/examples/starters/react?file=src/Layout.tsx) React + Vite ·
+[![Next.js starter on StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/d4ndel1on/pagegeist/tree/main/examples/starters/next?file=app/layout.tsx) Next.js App Router ·
+[![Vite starter on StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/d4ndel1on/pagegeist/tree/main/examples/starters/vite?file=src/main.ts) Vanilla + Vite
+
 ### React
 
 <!-- snippet: examples/react.tsx -->

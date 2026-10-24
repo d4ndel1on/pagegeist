@@ -1,0 +1,10 @@
+{
+  // Browser tests and Playwright configs run in Node: Node types, no isolatedDeclarations.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "isolatedDeclarations": false,
+    "declaration": false,
+    "types": ["node"]
+  },
+  "include": [".", "../playwright.config.ts", "../playwright.starters.config.ts"]
+}
