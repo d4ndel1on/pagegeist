@@ -531,11 +531,15 @@ code {
   grid-template-columns: 1fr;
 }
 
-/* Wide enough for the longest option name ("safeArea.bottom"); fields without a value
-   readout use the readout column too. */
+/* Wide enough for the longest option name ("safeArea.bottom") and the "reset" button;
+   fields without a value readout use the readout column too. */
 .panel__lab label {
   display: grid;
-  grid-template-columns: 9.5em minmax(0, 1fr) 3.5em;
+  grid-template-columns: 9.5em minmax(0, 1fr) 4.5em;
+}
+
+.panel__lab label > button {
+  padding-inline: 0;
 }
 
 .panel__lab label > select,

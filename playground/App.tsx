@@ -42,6 +42,50 @@ const DEFAULT_RESPAWN_AFTER = 1.5;
 /** Keyboard shortcuts – also listed in the panel. */
 const SHORTCUTS = 'D debug · P pause · R respawn · S slow-mo · Esc close';
 
+/** Hover help for every control, keyed by its label (mirrors the option docs in options.ts). */
+const HINTS: Record<string, string> = {
+  // behaviors
+  walk: 'Wander around on the element she stands on.',
+  jump: 'Jump to neighboring elements.',
+  hang: 'Hang from edges, shimmy along them and climb up.',
+  sit: 'Sit down on elements, legs dangling.',
+  drop: 'Drop off the edge of an element down to the next one.',
+  drag: 'Let visitors grab, carry and throw her.',
+  poke: 'React when she is clicked or tapped.',
+  watchCursor: 'Turn her head towards the cursor.',
+  chatter: 'Occasionally say something on her own.',
+  // options
+  fishnets: 'Fishnet tights.',
+  announce: 'Also read her speech bubbles to screen readers (polite live region).',
+  markElements:
+    'Set data-pagegeist-occupied / data-pagegeist-landed on the elements she stands or lands on – for your own CSS effects (the cards here glow).',
+  'light page': 'Demo only: switch this page to a light background to see the outline adapt.',
+  // look
+  size: 'Standing height in CSS pixels.',
+  outfit: 'classic: velvet top, corset and long layered skirt · corset: strappy corset top and short ruffled skirt.',
+  shoes: 'boots: knee-high stiletto boots · heels: lace-up platform boots.',
+  outline: 'Light rim around her dark outfit. auto: only on dark backgrounds · always · never.',
+  outlineColor: 'CSS color of the outline. reset = library default.',
+  // placement
+  spawn: 'Where she appears horizontally. Changing it remounts her.',
+  textLines:
+    'How paragraphs become platforms. all: every text line · first: only the first line · none: the whole block.',
+  minWidth: 'Elements narrower than this (px) are not platforms.',
+  ignore: 'Comma-separated CSS selectors that never become platforms, e.g. ".nav, h1".',
+  'safeArea.top':
+    'Strip at the top of the viewport (px) she never stands in. Empty = auto: detects fixed/sticky headers, so her head never ends up under the navigation.',
+  'safeArea.bottom': 'Same at the bottom edge (px), e.g. for cookie banners or bottom bars. Empty = auto.',
+  respawnAfter: 'Seconds she may stay off-screen before she drops back into view.',
+  // motion & controls
+  timeScale: 'Simulation speed: below 1 is slow motion, everything slows down uniformly.',
+  reducedMotion:
+    "Only applies when the OS setting 'reduce motion' is on. static: stays put, only blinks · calm: moves less, no acrobatics · hidden: not shown · ignore: no change.",
+  pauseControl: 'Show a small built-in pause/resume button in a corner of the page.',
+  // phrases
+  trigger:
+    'Situation to edit phrases for. poke: clicked · grab: picked up · cursorNear: cursor close by · sit: sits down · idle: bored · land: after landing.',
+};
+
 /** Keep in sync with the sidebar breakpoint in styles.css. */
 const DOCKED_QUERY = '(min-width: 1100px)';
 
@@ -218,20 +262,32 @@ export function App(): JSX.Element {
         </div>
         <div className="panel__body">
           <div className="panel__row">
-            <button type="button" onClick={() => setDebug((d) => !d)} title="Key D">
+            <button
+              type="button"
+              onClick={() => setDebug((d) => !d)}
+              title="Show platforms, her hitbox and current plan (key D)"
+            >
               Debug
             </button>
-            <button type="button" title="Key P" onClick={() => togglePause(ref.current)}>
+            <button
+              type="button"
+              title="Freeze or unfreeze her – pause() / resume() (key P)"
+              onClick={() => togglePause(ref.current)}
+            >
               Pause / resume
             </button>
-            <button type="button" onClick={() => ref.current?.respawn()} title="respawn() · Key R">
+            <button
+              type="button"
+              onClick={() => ref.current?.respawn()}
+              title="Make her drop back into view – respawn() (key R)"
+            >
               Summon
             </button>
-            <button type="button" onClick={() => setTimeScale(toggleSlowMo)} title="Key S">
+            <button type="button" onClick={() => setTimeScale(toggleSlowMo)} title="Toggle quarter speed (key S)">
               Slow-mo
             </button>
           </div>
-          <p className="panel__hint panel__keys">Keys: {SHORTCUTS}</p>
+          <p className="panel__hint panel__keys">Keys: {SHORTCUTS}. Hover any control for an explanation.</p>
           <form
             className="panel__row"
             onSubmit={(e) => {
@@ -239,8 +295,14 @@ export function App(): JSX.Element {
               ref.current?.say(text);
             }}
           >
-            <input type="text" value={text} onChange={(e) => setText(e.target.value)} aria-label="Phrase" />
-            <button type="submit" title="say(text)">
+            <input
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              aria-label="Phrase"
+              title="Text for her speech bubble"
+            />
+            <button type="submit" title="Make her say the text – say(text)">
               Annoy her
             </button>
           </form>
@@ -248,7 +310,7 @@ export function App(): JSX.Element {
           <fieldset>
             <legend>behaviors</legend>
             {(Object.keys(DEFAULT_BEHAVIORS) as Array<keyof BehaviorOptions>).map((key) => (
-              <label key={key}>
+              <label key={key} title={HINTS[key]}>
                 <input
                   type="checkbox"
                   checked={behaviors[key]}
@@ -273,7 +335,7 @@ export function App(): JSX.Element {
             <Select label="outfit" value={outfit} options={['classic', 'corset']} onChange={setOutfit} />
             <Select label="shoes" value={shoes} options={['boots', 'heels']} onChange={setShoes} />
             <Select label="outline" value={outline} options={['auto', 'always', 'never']} onChange={setOutline} />
-            <label>
+            <label title={HINTS.outlineColor}>
               outlineColor
               <input
                 type="color"
@@ -281,7 +343,12 @@ export function App(): JSX.Element {
                 onChange={(e) => setOutlineColor(e.target.value)}
                 aria-label="Outline color"
               />
-              <button type="button" onClick={() => setOutlineColor('')} disabled={!outlineColor}>
+              <button
+                type="button"
+                title="Back to the default outline color"
+                onClick={() => setOutlineColor('')}
+                disabled={!outlineColor}
+              >
                 reset
               </button>
             </label>
@@ -292,11 +359,11 @@ export function App(): JSX.Element {
             <Select label="spawn" value={spawn} options={['random', 'left', 'center', 'right']} onChange={setSpawn} />
             <Select label="textLines" value={textLines} options={['all', 'first', 'none']} onChange={setTextLines} />
             <Range label="minWidth" min={0} max={200} step={1} value={minWidth} onChange={setMinWidth} />
-            <label title="Comma-separated CSS selectors that never become platforms">
+            <label title={HINTS.ignore}>
               ignore
               <input type="text" value={ignore} placeholder=".nav, h1" onChange={(e) => setIgnore(e.target.value)} />
             </label>
-            <label title="px; empty = auto (detects fixed/sticky headers)">
+            <label title={HINTS['safeArea.top']}>
               safeArea.top
               <input
                 type="text"
@@ -306,7 +373,7 @@ export function App(): JSX.Element {
                 onChange={(e) => setSafeTop(e.target.value)}
               />
             </label>
-            <label title="px; empty = auto (detects fixed/sticky footers)">
+            <label title={HINTS['safeArea.bottom']}>
               safeArea.bottom
               <input
                 type="text"
@@ -343,7 +410,6 @@ export function App(): JSX.Element {
               value={reducedMotion}
               options={['static', 'calm', 'hidden', 'ignore']}
               onChange={setReducedMotion}
-              title="Only applies when the OS setting 'reduce motion' is on"
             />
             <Select
               label="pauseControl"
@@ -354,6 +420,7 @@ export function App(): JSX.Element {
             <div className="panel__row">
               <button
                 type="button"
+                title="Turn on debug drawing and quarter speed together"
                 onClick={() => {
                   setDebug(true);
                   setTimeScale(SLOW_MO);
@@ -370,6 +437,7 @@ export function App(): JSX.Element {
             <textarea
               rows={4}
               aria-label={`Custom ${trigger} phrases, one per line`}
+              title="Your own phrases for the selected trigger, one per line. Empty = built-in phrases."
               value={customPhrases[trigger] ?? ''}
               placeholder={
                 DEFAULT_PHRASES[trigger].length
@@ -385,7 +453,9 @@ export function App(): JSX.Element {
               <GaitLab size={size} />
             </Suspense>
           )}
-          <pre>{snippet}</pre>
+          <pre title="Copy & paste: the props for your current settings (only what differs from the defaults)">
+            {snippet}
+          </pre>
         </div>
       </aside>
     </>
@@ -436,7 +506,7 @@ function compact(obj: Record<string, unknown>): Record<string, unknown> | undefi
 
 function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label>
+    <label title={HINTS[label]}>
       <input type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} />
       {label}
     </label>
@@ -448,10 +518,9 @@ function Select<T extends string>(props: {
   value: T;
   options: readonly T[];
   onChange: (value: T) => void;
-  title?: string;
 }) {
   return (
-    <label title={props.title}>
+    <label title={HINTS[props.label]}>
       {props.label}
       <select value={props.value} onChange={(e) => props.onChange(e.target.value as T)}>
         {props.options.map((o) => (
@@ -475,7 +544,7 @@ function Range(props: {
 }) {
   const { label, min, max, step, value, onChange, format = String } = props;
   return (
-    <label>
+    <label title={HINTS[label]}>
       {label}
       <input
         type="range"
