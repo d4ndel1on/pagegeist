@@ -27,6 +27,7 @@ export function createPagegeist(options: PagegeistOptions = {}): PagegeistInstan
   return new Engine(options);
 }
 
+export { goth, type PagegeistCharacter } from './core/character';
 export type { PagegeistInstance } from './core/Engine';
 export type {
   BehaviorOptions,

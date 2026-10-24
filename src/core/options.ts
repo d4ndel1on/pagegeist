@@ -1,3 +1,4 @@
+import { goth, type PagegeistCharacter } from './character';
 import type { PagegeistState, Vec2 } from './types';
 
 export type { PagegeistState, Vec2 };
@@ -135,7 +136,12 @@ export interface SafeAreaOptions {
  */
 export type ReducedMotionMode = 'static' | 'calm' | 'hidden' | 'ignore';
 
-/** Light rim around the dark outfit so she stays visible on dark pages. */
+/**
+ * Rim around her so she stays visible where she would blend in.
+ * - 'auto':   only where the character needs it (goth: dark backgrounds, sunny: both – a
+ *             ghostly glow on dark ones for her black hair, a blue-grey rim on light ones)
+ * - 'always' / 'never'
+ */
 export type OutlineMode = 'auto' | 'always' | 'never';
 
 /**
@@ -280,13 +286,26 @@ export interface PagegeistOptions extends PagegeistCallbacks {
    */
   reducedMotion?: ReducedMotionMode;
   /**
-   * Light rim around her dark outfit. 'auto' shows it only on dark backgrounds.
+   * Who haunts the page: {@link goth} (default) or her little sister `sunny` – same
+   * hand-me-down clothes, bleached ghostly white, opposite mood (colors, speech bubble, built-in
+   * phrases, and an eager temper: she notices the cursor from further away and hurries over to it).
+   * Import `sunny` from `@d4ndel1on/pagegeist/sunny`, so it costs nothing unless used.
+   * @defaultValue `goth`
+   * @example
+   * import { sunny } from '@d4ndel1on/pagegeist/sunny';
+   * createPagegeist({ character: sunny });
+   */
+  character?: PagegeistCharacter;
+  /**
+   * Rim around her. 'auto' shows it where the character would blend in: on dark backgrounds
+   * for `goth`; on both for `sunny` (a ghostly glow on dark ones, a blue-grey rim on light ones).
    * @defaultValue `'auto'`
    */
   outline?: OutlineMode;
   /**
    * CSS color of the outline.
-   * @defaultValue `'rgba(220, 205, 255, 0.32)'`
+   * @defaultValue the character's: `'rgba(220, 205, 255, 0.32)'` for `goth`; for `sunny`
+   * `'rgba(205, 220, 255, 0.4)'` on dark and `'rgba(70, 85, 130, 0.35)'` on light backgrounds
    */
   outlineColor?: string;
   /**
@@ -361,7 +380,9 @@ export interface ResolvedOptions {
   behaviors: BehaviorOptions;
   phrases: PhraseMap | PhraseResolver;
   reducedMotion: ReducedMotionMode;
+  character: PagegeistCharacter;
   outline: OutlineMode;
+  /** '' = the character's default. */
   outlineColor: string;
   outfit: OutfitStyle;
   shoes: ShoeStyle;
@@ -421,7 +442,8 @@ export function resolveOptions(options: PagegeistOptions, base?: ResolvedOptions
     phrases: options.phrases ?? pick('phrases', {}),
     reducedMotion: options.reducedMotion ?? pick('reducedMotion', 'static'),
     outline: options.outline ?? pick('outline', 'auto'),
-    outlineColor: options.outlineColor ?? pick('outlineColor', 'rgba(220, 205, 255, 0.32)'),
+    character: options.character ?? pick('character', goth),
+    outlineColor: options.outlineColor ?? pick('outlineColor', ''),
     outfit: options.outfit ?? pick('outfit', 'classic'),
     shoes: options.shoes ?? pick('shoes', 'boots'),
     fishnets: options.fishnets ?? pick('fishnets', false),

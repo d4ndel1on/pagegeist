@@ -1,5 +1,22 @@
 # Usage guide
 
+## Pick a sister
+
+Two characters share the same moves and options; pick the one that fits the tone of your site.
+
+| | `goth` (default) | `sunny` |
+|---|---|---|
+| Look | black velvet, lace and boots | the same dress, bleached ghostly white |
+| Mood | bratty, bossy, wants you gone | bubbly, friendly, wants your attention |
+| Cursor | watches it, keeps her distance | spots it from afar and hurries over |
+| Fits | dark, edgy, playful-mean sites, portfolios, Halloween | light, friendly sites, products, docs, anything cute |
+| Import | nothing extra | `import { sunny } from '@d4ndel1on/pagegeist/sunny'` |
+| Option | – | `character={sunny}` / `{ character: sunny }` |
+
+Speech bubbles, the pause button, the `'auto'` outline and the built-in phrases follow the
+character; your own `phrases` replace hers per trigger as usual. See
+[The character](character.md#her-little-sister-sunny).
+
 ## How she works
 
 Pagegeist adds one element to your page: a `div.pagegeist` overlay containing

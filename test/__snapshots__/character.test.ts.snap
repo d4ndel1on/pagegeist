@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`characters > sunny only recolors (classic-boots-bare) 1`] = `"7c85da6c:555135"`;
+
+exports[`characters > sunny only recolors (corset-heels-fishnets) 1`] = `"9cd13f56:647568"`;

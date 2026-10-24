@@ -21,6 +21,7 @@ export const DEFAULT_PHRASES: Readonly<Record<PhraseTrigger, PhraseList>> = Obje
     'Who said you could touch me?',
     'Do that again. See what happens.',
     'Ghost, not toy.',
+    'Poke my sister. She likes that.',
   ],
   grab: [
     'Put. Me. Down.',
@@ -31,6 +32,7 @@ export const DEFAULT_PHRASES: Readonly<Record<PhraseTrigger, PhraseList>> = Obje
     'Careful. I am vintage.',
     'You will regret this.',
     'Down. Now.',
+    "My sister likes this. I don't.",
   ],
   cursorNear: [
     'Personal space.',
@@ -42,6 +44,7 @@ export const DEFAULT_PHRASES: Readonly<Record<PhraseTrigger, PhraseList>> = Obje
     'Back off.',
     'Did I say you could come closer?',
     'Hover somewhere else.',
+    'Looking for the cute one? Wrong ghost.',
   ],
   sit: [
     'This button is mine now.',
@@ -50,6 +53,7 @@ export const DEFAULT_PHRASES: Readonly<Record<PhraseTrigger, PhraseList>> = Obje
     'Throne acquired.',
     'Not moving. Make me.',
     'My seat. My rules.',
+    "My sister would share. I won't.",
   ],
   idle: [
     '*sigh*',
@@ -62,6 +66,9 @@ export const DEFAULT_PHRASES: Readonly<Record<PhraseTrigger, PhraseList>> = Obje
     'Amuse me. Now.',
     'I could rearrange your buttons, you know.',
     'Tick tock.',
+    'Somewhere my sister is waving. Ugh.',
+    'She bleached my dress. Unforgivable.',
+    'White is not a color. Tell my sister.',
   ],
   land: [],
 });
@@ -90,9 +97,14 @@ function fromMap(map: PhraseMap, ctx: PhraseContext): PhraseList | undefined {
 
 /**
  * Resolves the text to say for a trigger, or null for silence.
- * Order: `data-pagegeist-say` on the element → user config → built-in defaults.
+ * Order: `data-pagegeist-say` on the element → user config → the character's built-ins.
  */
-export function resolvePhrase(config: PhraseMap | PhraseResolver, ctx: PhraseContext, rng: Random): string | null {
+export function resolvePhrase(
+  config: PhraseMap | PhraseResolver,
+  ctx: PhraseContext,
+  rng: Random,
+  defaults: Readonly<Record<PhraseTrigger, PhraseList>> = DEFAULT_PHRASES,
+): string | null {
   if (ctx.element && (ctx.trigger === 'land' || ctx.trigger === 'sit')) {
     const attr = ctx.element.closest(`[${SAY_ATTRIBUTE}]`)?.getAttribute(SAY_ATTRIBUTE);
     if (attr) {
@@ -112,5 +124,5 @@ export function resolvePhrase(config: PhraseMap | PhraseResolver, ctx: PhraseCon
     return null;
   }
   if (custom !== undefined) return custom;
-  return rng.pick(DEFAULT_PHRASES[ctx.trigger]) ?? null;
+  return rng.pick(defaults[ctx.trigger]) ?? null;
 }

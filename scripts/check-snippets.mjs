@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Keeps copy-paste snippets in the docs from rotting:
 // 1. A fenced code block preceded by `<!-- snippet: examples/x.tsx -->` must match that file
-//    exactly. The files in examples/ are type-checked and linted with the rest of the repo.
+//    exactly, and every marker needs such a block. The files in examples/ are type-checked and linted with the rest of the repo.
 // 2. The starter apps in examples/starters/ contain verbatim copies of some examples.
 // 3. Pinned CDN URLs (esm.sh/@d4ndel1on/pagegeist@x.y.z) must name the current version.
 // `--fix` rewrites the docs and copies instead of failing (run by `npm run version-packages`).
@@ -35,6 +35,10 @@ const errors = [];
 let snippets = 0;
 for (const doc of docs) {
   const original = readFileSync(join(root, doc), 'utf8');
+  // A marker must sit directly above its code block, otherwise the snippet silently goes missing.
+  const markers = original.match(/<!-- snippet: \S+ -->/g)?.length ?? 0;
+  const blocks = original.match(SNIPPET)?.length ?? 0;
+  if (markers !== blocks) errors.push(`${doc}: ${markers - blocks} snippet marker(s) without a code block right below`);
   const text = original
     .replace(SNIPPET, (match, head, file, body, fence) => {
       snippets++;

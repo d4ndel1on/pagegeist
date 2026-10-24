@@ -1,7 +1,7 @@
 {
   "name": "@d4ndel1on/pagegeist",
   "version": "0.1.3",
-  "description": "A bratty gothic poltergeist that haunts your web page: she walks on your headings, sits on your buttons, hangs from edges and climbs your text – mostly to annoy you. Zero dependencies, React adapter included.",
+  "description": "A bratty gothic poltergeist (or her friendly little sister in white) that haunts your web page: she walks on your headings, sits on your buttons, hangs from edges and climbs your text – mostly to annoy you. Zero dependencies, React adapter included.",
   "keywords": [
     "mascot",
     "website-mascot",
@@ -18,7 +18,8 @@
     "halloween",
     "goth",
     "poltergeist",
-    "ghost"
+    "ghost",
+    "cute"
   ],
   "license": "(MIT AND CC0-1.0)",
   "author": "d4ndel1on",
@@ -38,6 +39,10 @@
     "./react": {
       "types": "./dist/react.d.ts",
       "default": "./dist/react.js"
+    },
+    "./sunny": {
+      "types": "./dist/sunny.d.ts",
+      "default": "./dist/sunny.js"
     },
     "./package.json": "./package.json"
   },
@@ -110,7 +115,7 @@
       "name": "core (vanilla)",
       "path": "dist/index.js",
       "import": "{ createPagegeist }",
-      "limit": "24.5 kB"
+      "limit": "24.75 kB"
     },
     {
       "name": "react adapter",
@@ -119,7 +124,13 @@
       "ignore": [
         "react"
       ],
-      "limit": "24.75 kB"
+      "limit": "25 kB"
+    },
+    {
+      "name": "sunny character",
+      "path": "dist/sunny.js",
+      "import": "{ sunny }",
+      "limit": "1 kB"
     }
   ]
 }

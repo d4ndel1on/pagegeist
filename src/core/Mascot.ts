@@ -1,4 +1,5 @@
 import type { Plan } from './behavior';
+import type { Temper } from './character';
 import { cycleLength, GAIT, walkSpeed } from './gait';
 import type { PagegeistEventMap, PagegeistEventName, PhraseTrigger, ResolvedOptions } from './options';
 import { resolvePhrase } from './phrases';
@@ -121,6 +122,11 @@ export class Mascot {
 
   get behaviors(): ResolvedOptions['behaviors'] {
     return this.options.behaviors;
+  }
+
+  /** How eagerly the current character goes for the cursor. */
+  get temper(): Temper {
+    return this.options.character.temper;
   }
 
   start(spawnX: number | null): void {
@@ -400,7 +406,12 @@ export class Mascot {
 
   /** Resolves and says a phrase for the trigger (if any). */
   speak(trigger: PhraseTrigger, element: Element | null, duration?: number): void {
-    const text = resolvePhrase(this.options.phrases, { trigger, element, state: this.state }, this.rng);
+    const text = resolvePhrase(
+      this.options.phrases,
+      { trigger, element, state: this.state },
+      this.rng,
+      this.options.character.phrases,
+    );
     if (text) this.say(text, duration, trigger);
   }
 
@@ -420,7 +431,7 @@ export class Mascot {
    * braking speed, so she slows down before arriving; steps shorten with the speed.
    * Returns true once the target is reached.
    */
-  walkToward(targetX: number, dt: number): boolean {
+  walkToward(targetX: number, dt: number, pace = 1): boolean {
     const dx = targetX - this.body.pos.x;
     if (Math.abs(dx) < 1.5) {
       this.body.pos.x = targetX;
@@ -428,7 +439,7 @@ export class Mascot {
       return true;
     }
     const h = this.metrics.height;
-    const full = walkSpeed(h);
+    const full = walkSpeed(h) * pace;
     // A fresh walk starts from a standstill near the passing pose (feet close together).
     if (this.time - this.walkedAt > 0.25) {
       const cycle = cycleLength(h);
@@ -472,7 +483,7 @@ export class Mascot {
     const dx = c.x - this.body.pos.x;
     const dy = c.y - (this.body.pos.y - this.metrics.height * 0.85);
     const dist = Math.hypot(dx, dy);
-    const k = this.physics.scale;
+    const k = this.physics.scale * this.temper.cursorRange;
     if (allowTurn && dist < 380 * k && Math.abs(dx) > 30 * k) this.facing = dx > 0 ? 1 : -1;
     if (dist < 90 * k) {
       this.cursorNearTime += dt;
@@ -521,7 +532,7 @@ export class Mascot {
   renderState(): RenderState {
     const pos = this.body.pos;
     const c = this.cursor;
-    const lookRange = 520 * this.physics.scale;
+    const lookRange = 520 * this.physics.scale * this.temper.cursorRange;
     return {
       state: this.state,
       stateTime: this.fsm.time,

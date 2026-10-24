@@ -15,6 +15,8 @@ export interface Plan {
   walkToX: number;
   next: FollowUp;
   label: string;
+  /** Walking speed factor (default 1). */
+  pace?: number;
 }
 
 const KIND_PREFERENCE: Record<Platform['kind'], number> = {
@@ -39,14 +41,19 @@ export function decide(m: Mascot): Plan | null {
   const x = m.body.pos.x;
   const width = p.right - p.left;
   const calm = m.motion === 'calm' ? 0.35 : 1;
+  const eager = b.walk && b.watchCursor ? approach(m, p, x) : null;
+  // Cursor on another level: an eager character jumps towards it instead of walking.
+  const chase = b.watchCursor && cursorLevel(m, p) !== 0 ? 1 + m.temper.approach : 1;
 
   const options: Array<{ weight: number; value: () => Plan | null }> = [
     { weight: b.walk && width > 70 ? 2.5 : 0, value: () => wander(m, p, x) },
-    { weight: b.jump ? 4.5 * calm : 0, value: () => jumpToNeighbor(m, p) },
+    { weight: b.jump ? 4.5 * calm * chase : 0, value: () => jumpToNeighbor(m, p) },
     { weight: b.sit && p.sittable && width > 50 ? 1.8 : 0, value: () => sit(m, p) },
     { weight: b.hang && p.hangable && m.motion === 'full' ? 1.3 : 0, value: () => hangOwnEdge(m, p) },
     { weight: b.drop && p.kind !== 'floor' ? 0.7 * calm : 0, value: () => drop(m, p) },
     { weight: 1.2 / calm, value: () => null }, // just keep chilling
+    // Last, so a weight of 0 (goth) leaves the random choice among the others untouched.
+    { weight: eager ? m.temper.approach * calm : 0, value: () => eager },
   ];
   return m.rng.weighted(options)?.() ?? null;
 }
@@ -55,6 +62,18 @@ function wander(m: Mascot, p: Platform, x: number): Plan {
   let target = m.rng.range(p.left + 12, p.right - 12);
   if (Math.abs(target - x) < 40) target = x < (p.left + p.right) / 2 ? p.right - 14 : p.left + 14;
   return { walkToX: target, next: { type: 'none' }, label: 'wander' };
+}
+
+/** Walk over to the cursor (to the platform edge closest to it), or null if she is already there. */
+function approach(m: Mascot, p: Platform, x: number): Plan | null {
+  const c = m.cursor;
+  if (!c || !m.temper.approach || cursorLevel(m, p) !== 0) return null;
+  const k = m.physics.scale;
+  const dx = c.x - x;
+  if (Math.abs(dx) < 40 * k) return null; // right below it: just look up
+  const target = clamp(c.x - Math.sign(dx) * 26 * k, p.left + 12, p.right - 12);
+  if (Math.abs(target - x) < 20 * k) return null;
+  return { walkToX: target, next: { type: 'none' }, label: 'approach', pace: m.temper.pace };
 }
 
 function sit(m: Mascot, p: Platform): Plan {
@@ -108,11 +127,29 @@ function jumpToNeighbor(m: Mascot, p: Platform): Plan | null {
 
     const dist = dx + Math.abs(rise);
     candidates.push({
-      weight: KIND_PREFERENCE[q.kind] / (1 + dist / (170 * m.physics.scale)),
+      weight: (KIND_PREFERENCE[q.kind] / (1 + dist / (170 * m.physics.scale))) * towardCursor(m, q),
       value: { walkToX: takeoffX, next, label: `${next.type} → ${q.kind}` },
     });
   }
   return m.rng.weighted(candidates);
+}
+
+/** -1 / 1 when the cursor is clearly above / below her platform, 0 when it is at her level (or absent). */
+function cursorLevel(m: Mascot, p: Platform): number {
+  const c = m.cursor;
+  if (!c || !m.temper.approach) return 0;
+  const h = m.metrics.height;
+  return c.y < p.top - 1.5 * h ? -1 : c.y > p.top + 0.6 * h ? 1 : 0;
+}
+
+/** Extra weight for platforms close to the cursor – 1 when the character does not care (goth). */
+function towardCursor(m: Mascot, q: Platform): number {
+  const c = m.cursor;
+  const a = m.temper.approach;
+  if (!c || !a || !m.behaviors.watchCursor) return 1;
+  const x = clamp(c.x, q.left, q.right);
+  const d = Math.hypot(c.x - x, c.y - q.top);
+  return 1 + a / (1 + d / (120 * m.physics.scale));
 }
 
 /** Determine take-off and landing points between two platforms. */

@@ -1,11 +1,13 @@
 Pagegeist character design – CC0 1.0 Universal (Public Domain Dedication)
 
-The visual design of the Pagegeist character – her appearance, outfit, proportions,
-poses and expressions as drawn by src/core/render/GothRenderer.ts, and any images
-or animations of her in this repository – is dedicated to the public domain.
+The visual design of the Pagegeist characters – the default character ("goth") and
+her little sister ("sunny"): their appearance, outfits, color palettes, proportions,
+poses and expressions as drawn by src/core/render/GothRenderer.ts with the palettes
+in src/core/render/GothRenderer.ts and src/sunny.ts, and any images or animations of
+them in this repository – is dedicated to the public domain.
 
 To the extent possible under law, d4ndel1on has waived all copyright and related
-or neighboring rights to the Pagegeist character design. You can copy, modify,
+or neighboring rights to the Pagegeist character designs. You can copy, modify,
 distribute and use it, even for commercial purposes, all without asking
 permission and without attribution.
 

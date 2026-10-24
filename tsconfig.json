@@ -20,7 +20,8 @@
     "types": ["vite/client"],
     "paths": {
       "@d4ndel1on/pagegeist": ["./src/index.ts"],
-      "@d4ndel1on/pagegeist/react": ["./src/react/index.ts"]
+      "@d4ndel1on/pagegeist/react": ["./src/react/index.ts"],
+      "@d4ndel1on/pagegeist/sunny": ["./src/sunny.ts"]
     }
   },
   "include": ["src", "test", "playground"]

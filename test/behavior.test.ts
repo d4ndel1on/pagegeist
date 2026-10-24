@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { DEFAULT_PHRASES, goth } from '../src';
 import { decide } from '../src/core/behavior';
 import { Mascot } from '../src/core/Mascot';
 import { type PagegeistOptions, resolveOptions } from '../src/core/options';
@@ -7,6 +8,7 @@ import { createRandom, seeded } from '../src/core/random';
 import { GothRenderer } from '../src/core/render/GothRenderer';
 import { MascotState, type Platform } from '../src/core/types';
 import type { DomCollisionWorld } from '../src/core/World';
+import { SUNNY_PHRASES, sunny } from '../src/sunny';
 
 const platform = (id: string, left: number, right: number, top: number, kind: Platform['kind'] = 'generic') => ({
   id,
@@ -46,6 +48,74 @@ function setup(options: PagegeistOptions = {}, platforms?: Platform[], seed = 7)
   m.standOn(list[0]!, 300);
   return { m, emit, world };
 }
+
+describe('eager sister (sunny)', () => {
+  const plansWith = (options: PagegeistOptions, cursor = { x: 480, y: 420 }) => {
+    const { m } = setup(options);
+    m.cursor = cursor;
+    return Array.from({ length: 80 }, () => decide(m)).filter((p) => p !== null);
+  };
+
+  it('walks over to the cursor, faster than usual', () => {
+    const approaches = plansWith({ character: sunny }).filter((p) => p.label === 'approach');
+    expect(approaches.length).toBeGreaterThan(20);
+    for (const plan of approaches) {
+      expect(plan.walkToX).toBeGreaterThan(400);
+      expect(plan.pace).toBe(sunny.temper.pace);
+    }
+  });
+
+  it('leaves goth and a disabled watchCursor alone', () => {
+    expect(plansWith({}).some((p) => p.label === 'approach')).toBe(false);
+    const blind = plansWith({ character: sunny, behaviors: { watchCursor: false } });
+    expect(blind.some((p) => p.label === 'approach')).toBe(false);
+  });
+
+  it('does not approach a cursor right above her', () => {
+    const plans = plansWith({ character: sunny }, { x: 310, y: 300 });
+    expect(plans.some((p) => p.label === 'approach')).toBe(false);
+  });
+
+  it('prefers jumps towards the cursor', () => {
+    const jumps = (options: PagegeistOptions) =>
+      plansWith({ ...options, behaviors: { walk: false, hang: false, sit: false, drop: false } }, { x: 660, y: 440 })
+        .filter((p) => p.next.type === 'jump')
+        .map((p) => (p.next as { platformId: string }).platformId);
+    const share = (ids: string[]) => ids.filter((id) => id === 'neighbor').length / ids.length;
+    expect(share(jumps({ character: sunny }))).toBeGreaterThan(share(jumps({})));
+  });
+
+  it('jumps instead of walking when the cursor is on another level', () => {
+    const below = { x: 300, y: 790 };
+    const jumpShare = (options: PagegeistOptions) => {
+      const plans = plansWith(options, below);
+      return plans.filter((p) => p.next.type === 'jump').length / plans.length;
+    };
+    expect(plansWith({ character: sunny }, below).some((p) => p.label === 'approach')).toBe(false);
+    expect(jumpShare({ character: sunny })).toBeGreaterThan(jumpShare({}) * 1.5);
+  });
+
+  it('notices the cursor from further away', () => {
+    const turns = (options: PagegeistOptions) => {
+      const { m } = setup(options);
+      m.facing = -1;
+      m.cursor = { x: 300 + 500, y: 500 - 168 * 0.85 };
+      m.watchCursor(0.1, true);
+      return m.facing;
+    };
+    expect(turns({})).toBe(-1);
+    expect(turns({ character: sunny })).toBe(1);
+  });
+
+  it('walks faster with a higher pace', () => {
+    const covered = (pace: number) => {
+      const { m } = setup();
+      for (let i = 0; i < 120; i++) m.walkToward(490, 1 / 120, pace);
+      return m.body.pos.x - 300;
+    };
+    expect(covered(sunny.temper.pace)).toBeGreaterThan(covered(1) * 1.2);
+  });
+});
 
 describe('decide', () => {
   it('does nothing when every behavior is disabled', () => {
@@ -127,5 +197,14 @@ describe('Mascot', () => {
     m.poke();
     expect(m.bubble?.text).toBe('Hey.');
     expect(emit).toHaveBeenCalledWith('say', { text: 'Hey.', trigger: 'poke' });
+  });
+
+  it("falls back to the character's built-in phrases", () => {
+    const { m } = setup({ character: sunny });
+    m.poke();
+    expect(SUNNY_PHRASES.poke).toContain(m.bubble?.text);
+    m.options = resolveOptions({ character: goth }, m.options);
+    m.poke();
+    expect(DEFAULT_PHRASES.poke).toContain(m.bubble?.text);
   });
 });

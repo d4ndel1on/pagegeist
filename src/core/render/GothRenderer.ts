@@ -52,7 +52,38 @@ const SK = {
 /** Face/hair are drawn in "head units" (radius 11.5) and scaled by this factor. */
 const HEAD_S = SK.headR / 11.5;
 
-const C = {
+/** Colors of the renderer; a character swaps them as a whole (see `PagegeistCharacter`). */
+export type Palette = Readonly<
+  Record<
+    | 'skin'
+    | 'skinFar'
+    | 'skinLine'
+    | 'hair'
+    | 'hairHi'
+    | 'velvet'
+    | 'velvetFar'
+    | 'velvetHi'
+    | 'corset'
+    | 'lacing'
+    | 'lace'
+    | 'laceHi'
+    | 'chiffon'
+    | 'metal'
+    | 'liner'
+    | 'iris'
+    | 'lips'
+    | 'boot'
+    | 'bootFar'
+    | 'bootHi'
+    | 'buckle'
+    | 'red'
+    | 'redHi'
+    | 'net',
+    string
+  >
+>;
+
+export const GOTH_PALETTE: Palette = Object.freeze({
   skin: '#f7ece6',
   skinFar: '#e3d3cb',
   skinLine: 'rgba(120, 70, 60, 0.35)',
@@ -77,7 +108,10 @@ const C = {
   red: '#8e1b2b',
   redHi: '#b3263a',
   net: 'rgba(8, 6, 10, 0.62)',
-} as const;
+});
+
+/** Palette of the part being drawn; every queued part sets it right before it draws. */
+let C: Palette = GOTH_PALETTE;
 
 interface Limb {
   elbow: Vec2;
@@ -205,6 +239,8 @@ export class GothRenderer implements MascotRenderer {
   readonly metrics: MascotMetrics;
   /** Current clothing; read on every draw. */
   look: Look = DEFAULT_LOOK;
+  /** Current colors; read on every draw. */
+  palette: Palette = GOTH_PALETTE;
   private readonly scale: number;
   private last: Skeleton | null = null;
   private facing = 1;
@@ -286,8 +322,10 @@ export class GothRenderer implements MascotRenderer {
     const sway = rs.calm ? 0 : rs.hairSway * Math.sign(f); // world-space sway in the (possibly mid-turn) drawing frame
     const hem = lag.slice(1).map((a) => clamp(a * SWAY.hem, -SWAY.hemMax, SWAY.hemMax));
 
+    const palette = this.palette;
     const part = (dz: number, fn: (ctx: CanvasRenderingContext2D) => void) =>
       queue.push(z + dz, (ctx) => {
+        C = palette;
         ctx.translate(x, y);
         ctx.scale(f * k * (1 + sq), k * (1 - sq));
         ctx.lineCap = 'round';

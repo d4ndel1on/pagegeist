@@ -1,5 +1,6 @@
 import type { OutfitStyle, ShoeStyle } from '../options';
 import type { Facing, MascotState, Rect, Vec2 } from '../types';
+import type { Palette } from './GothRenderer';
 
 /**
  * Everything a renderer needs to know about the current state. The renderer is stateless
@@ -68,6 +69,8 @@ export interface MascotRenderer {
   readonly metrics: MascotMetrics;
   /** Current clothing. Renderers without wardrobe support may ignore it. */
   look?: Look;
+  /** Current colors (from the character). Renderers without palette support may ignore it. */
+  palette?: Palette;
   /**
    * Pushes draw commands into the queue. (x, y) = feet position in screen space.
    * `zBase` is the mascot's depth layer; body parts sort themselves relative to it

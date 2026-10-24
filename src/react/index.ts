@@ -197,6 +197,7 @@ export type {
   OutfitStyle,
   OutlineMode,
   PagegeistCallbacks,
+  PagegeistCharacter,
   PagegeistEventMap,
   PagegeistEventName,
   PagegeistInstance,

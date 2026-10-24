@@ -45,10 +45,17 @@ npm run changeset  # describe user-facing changes (skip for docs/internal-only c
 ## Size budget
 
 `size-limit` (configured in `package.json`, min+brotli incl. all dependencies) caps the
-bundles at **24.5 kB** for the core and **24.75 kB** for the React adapter.
+bundles at **24.75 kB** for the core and **25 kB** for the React adapter.
+
+The `sunny` character entry (`dist/sunny.js`, pure data) has its own budget of **1 kB**
+(measured 0.96 kB).
 
 History:
 
+- **24.5 kB / 24.75 kB → 24.75 kB / 25 kB** (approved by the repo owner; measured 24.38 kB /
+  24.79 kB). The growth is the owner-requested `character` option: palette, bubble and outline
+  per character, the cursor-chasing temper of `sunny` and seven new sibling-teasing phrases
+  for `goth`. `sunny`'s own data stays in `dist/sunny.js`.
 - **24.25 kB → 24.5 kB** core only (approved by the repo owner; measured 24.26 kB /
   24.63 kB). The growth is the 16 owner-requested built-in phrases added in 0.1.1.
 - **23.75 kB / 24 kB → 24.25 kB / 24.75 kB** (approved by the repo owner; measured

@@ -1,6 +1,6 @@
 # pagegeist
 
-> Animated mascot overlay for web pages (npm: @d4ndel1on/pagegeist): a small, bratty gothic poltergeist drawn on a fullscreen canvas that walks on the page's real headings, text lines, buttons and cards. Purely decorative and accessible (aria-hidden, reduced motion, optional pause control). Zero runtime dependencies, vanilla JS core plus a React adapter that is SSR-safe and marked "use client" (Next.js App Router ready). TypeScript types included. MIT code, CC0 artwork.
+> Animated mascot overlay for web pages (npm: @d4ndel1on/pagegeist): a small, bratty gothic poltergeist (or her friendly little sister `sunny` in white, from `@d4ndel1on/pagegeist/sunny`) drawn on a fullscreen canvas that walks on the page's real headings, text lines, buttons and cards. Purely decorative and accessible (aria-hidden, reduced motion, optional pause control). Zero runtime dependencies, vanilla JS core plus a React adapter that is SSR-safe and marked "use client" (Next.js App Router ready). TypeScript types included. MIT code, CC0 artwork.
 
 Install with `npm install @d4ndel1on/pagegeist`. React projects render `<Pagegeist pauseControl />` from `@d4ndel1on/pagegeist/react` once in the root layout; everything else calls `createPagegeist()` from `@d4ndel1on/pagegeist` in the browser and `destroy()` on teardown:
 
@@ -25,7 +25,7 @@ Key rules: mount exactly one mascot; call `createPagegeist()` only in the browse
 
 - [Recipes](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/recipes.md): i18n, easter eggs, CTA reactions, quiet mode, CDN usage, tests
 - [FAQ & troubleshooting](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/faq.md): performance, z-index, sticky headers, CSP, browser support
-- [The character](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/character.md): design, wardrobe options, artwork license
+- [The character](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/docs/character.md): design, her friendly little sister `sunny` in white, wardrobe options, artwork license
 - [README](https://raw.githubusercontent.com/d4ndel1on/pagegeist/main/README.md): overview
 - [Live demo](https://d4ndel1on.github.io/pagegeist/): interactive playground with every option
 - [Starter apps](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters): complete Next.js App Router, React + Vite and vanilla Vite apps, tested in CI against the package; the React and Vite starters open on StackBlitz via https://stackblitz.com/github/d4ndel1on/pagegeist/tree/main/examples/starters/<react|vite> (current Next.js does not run on StackBlitz)
