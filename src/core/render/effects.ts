@@ -1,3 +1,5 @@
+import { goth } from '../character';
+
 /**
  * 2.5D effects that are independent of the character renderer:
  * ground shadow (depth via distance) and wall shadow (mascot hangs *in front of* the element).
@@ -108,6 +110,7 @@ export function drawSpeechBubble(
   y: number,
   text: string,
   alpha: number,
+  [fill, stroke, color]: readonly [string, string, string] = goth.bubble,
 ): void {
   ctx.globalAlpha = alpha;
   const padX = 10;
@@ -119,8 +122,8 @@ export function drawSpeechBubble(
   const vw = ctx.canvas.width / (ctx.getTransform?.().a || 1);
   const left = Math.max(6, Math.min(x - w / 2, vw - w - 6));
   const top = Math.max(6, y - h - 10);
-  ctx.fillStyle = 'rgba(18, 13, 24, 0.92)';
-  ctx.strokeStyle = 'rgba(190, 150, 255, 0.55)';
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
   ctx.lineWidth = 1;
   ctx.beginPath();
   if (ctx.roundRect) ctx.roundRect(left, top, w, h, 10);
@@ -142,7 +145,7 @@ export function drawSpeechBubble(
   ctx.lineTo(tipX + 5, top + h);
   ctx.fill();
   ctx.stroke();
-  ctx.fillStyle = '#f2ecff';
+  ctx.fillStyle = color;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
   for (let i = 0; i < lines.length; i++) {

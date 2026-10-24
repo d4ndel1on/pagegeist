@@ -1,9 +1,9 @@
 import {
   type BehaviorOptions,
   DEFAULT_BEHAVIORS,
-  DEFAULT_PHRASES,
   DEFAULT_PLATFORMS,
   DEFAULT_SIZE,
+  goth,
   type OutfitStyle,
   type OutlineMode,
   type PagegeistOptions,
@@ -16,7 +16,9 @@ import {
   type TextLineMode,
 } from '@d4ndel1on/pagegeist';
 import { Pagegeist, type PagegeistHandle } from '@d4ndel1on/pagegeist/react';
+import { sunny } from '@d4ndel1on/pagegeist/sunny';
 import { type JSX, lazy, type RefObject, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { COPY, type PageCopy } from './copy';
 
 /**
  * The gait lab tweaks internal (non-public) tuning constants. It is only loaded on the dev
@@ -26,18 +28,18 @@ import { type JSX, lazy, type RefObject, Suspense, useCallback, useEffect, useRe
 const LAB_ENABLED = import.meta.env.DEV || new URLSearchParams(window.location.search).has('lab');
 const GaitLab = lazy(() => import('./GaitLab'));
 
-/** Demo-page specific phrases (not shown in the snippet). */
-const LAND_ON: PhraseMap['landOn'] = {
-  '.btn--primary': ['This one looks important. Mine now.', 'Click it. I dare you.'],
-};
-
 const TRIGGERS: readonly PhraseTrigger[] = ['poke', 'grab', 'cursorNear', 'sit', 'idle', 'land'];
 type Spawn = 'random' | 'left' | 'center' | 'right';
 type PausePosition = 'off' | PauseControlOptions['position'];
 
-/** Library default, needed to reset the color after a custom one was applied via update(). */
-const DEFAULT_OUTLINE_COLOR = 'rgba(220, 205, 255, 0.32)';
 const DEFAULT_RESPAWN_AFTER = 1.5;
+const CHARACTERS = { goth, sunny };
+type CharacterName = keyof typeof CHARACTERS;
+const NAMES = Object.keys(CHARACTERS) as CharacterName[];
+
+/** `?character=sunny` deep-links to a sister (used by the README and docs). */
+const INITIAL_CHARACTER: CharacterName =
+  new URLSearchParams(window.location.search).get('character') === 'sunny' ? 'sunny' : 'goth';
 
 /** Keyboard shortcuts – also listed in the panel. */
 const SHORTCUTS = 'D debug · P pause · R respawn · S slow-mo · Esc close';
@@ -59,13 +61,16 @@ const HINTS: Record<string, string> = {
   announce: 'Also read her speech bubbles to screen readers (polite live region).',
   markElements:
     'Set data-pagegeist-occupied / data-pagegeist-landed on the elements she stands or lands on – for your own CSS effects (the cards here glow).',
-  'light page': 'Demo only: switch this page to a light background to see the outline adapt.',
+  'light page':
+    'Demo only: light or dark page background. Follows the character (sunny: light) – flip it to see each sister on the other background.',
   // look
+  character:
+    'goth: the bratty gothic poltergeist · sunny: her little sister – same dress, bleached white, opposite mood.',
   size: 'Standing height in CSS pixels.',
   outfit: 'classic: velvet top, corset and long layered skirt · corset: strappy corset top and short ruffled skirt.',
   shoes: 'boots: knee-high stiletto boots · heels: lace-up platform boots.',
-  outline: 'Light rim around her dark outfit. auto: only on dark backgrounds · always · never.',
-  outlineColor: 'CSS color of the outline. reset = library default.',
+  outline: 'Rim around her. auto: where she would blend in (goth: dark pages, sunny: both) · always · never.',
+  outlineColor: "CSS color of the outline. reset = the character's default.",
   // placement
   spawn: 'Where she appears horizontally. Changing it remounts her.',
   textLines:
@@ -99,6 +104,7 @@ export function App(): JSX.Element {
   const [spawn, setSpawn] = useState<Spawn>('random');
   const [outline, setOutline] = useState<OutlineMode>('auto');
   const [outlineColor, setOutlineColor] = useState(''); // '' = library default
+  const [character, setCharacter] = useState<CharacterName>(INITIAL_CHARACTER);
   const [outfit, setOutfit] = useState<OutfitStyle>('classic');
   const [shoes, setShoes] = useState<ShoeStyle>('boots');
   const [fishnets, setFishnets] = useState(false);
@@ -116,8 +122,10 @@ export function App(): JSX.Element {
   const [timeScale, setTimeScale] = useState(1);
   const [trigger, setTrigger] = useState<PhraseTrigger>('poke');
   const [customPhrases, setCustomPhrases] = useState<Partial<Record<PhraseTrigger, string>>>({});
-  const [light, setLight] = useState(false);
-  const [text, setText] = useState('This page is mine now.');
+  const [light, setLight] = useState(COPY[INITIAL_CHARACTER].light);
+  const [text, setText] = useState(COPY[INITIAL_CHARACTER].defaultText);
+  const copy = COPY[character];
+  const shown = useRef(character);
   // Docked sidebar on wide screens starts open; the bottom sheet on small screens starts closed.
   const [panelOpen, setPanelOpen] = useState(() => window.matchMedia(DOCKED_QUERY).matches);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -127,6 +135,27 @@ export function App(): JSX.Element {
   useEffect(() => {
     document.documentElement.dataset.theme = light ? 'light' : 'dark';
   }, [light]);
+
+  // The page follows the sister: accent colors, a shareable URL and a short entrance. The
+  // mascot (a child) has already applied the new character when this effect runs.
+  useEffect(() => {
+    document.documentElement.dataset.character = character;
+    const url = new URL(window.location.href);
+    if (character === 'goth') url.searchParams.delete('character');
+    else url.searchParams.set('character', character);
+    window.history.replaceState(null, '', url);
+    // Compared, not flagged: StrictMode runs this effect twice on mount.
+    if (shown.current === character) return;
+    shown.current = character;
+    ref.current?.respawn();
+    ref.current?.say(COPY[character].hello);
+  }, [character]);
+
+  const selectCharacter = useCallback((name: CharacterName) => {
+    setCharacter(name);
+    setLight(COPY[name].light);
+    setText(COPY[name].defaultText);
+  }, []);
 
   // The page reserves room for the docked sidebar via this attribute (see styles.css).
   // Focus follows the toggle so keyboard users don't get lost – but not on the first render.
@@ -155,9 +184,13 @@ export function App(): JSX.Element {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const onLand = useCallback(({ element }: { element: Element | null }) => {
-    if (element instanceof HTMLElement && element.matches('.card .btn')) element.textContent = '🖤 Claimed.';
-  }, []);
+  const claimed = copy.claimed;
+  const onLand = useCallback(
+    ({ element }: { element: Element | null }) => {
+      if (element instanceof HTMLElement && element.matches('.card .btn')) element.textContent = claimed;
+    },
+    [claimed],
+  );
 
   // Every option is always passed explicitly: update() keeps the previous value of an
   // omitted option, so leaving one out would not reset it.
@@ -171,7 +204,9 @@ export function App(): JSX.Element {
     size,
     spawn,
     outline,
-    outlineColor: outlineColor || DEFAULT_OUTLINE_COLOR,
+    // Removed props fall back to the defaults in React, so undefined resets the color.
+    outlineColor: outlineColor || undefined,
+    character: CHARACTERS[character],
     outfit,
     shoes,
     fishnets,
@@ -193,6 +228,7 @@ export function App(): JSX.Element {
     size: size !== DEFAULT_SIZE ? size : undefined,
     spawn: spawn !== 'random' ? spawn : undefined,
     outline: outline !== 'auto' ? outline : undefined,
+    character: character !== 'goth' ? new Code(character) : undefined,
     outlineColor: outlineColor || undefined,
     outfit: outfit !== 'classic' ? outfit : undefined,
     shoes: shoes !== 'boots' ? shoes : undefined,
@@ -225,11 +261,12 @@ export function App(): JSX.Element {
         key={spawn}
         ref={ref}
         {...options}
-        phrases={{ ...phrases, landOn: LAND_ON }}
+        phrases={{ ...phrases, landOn: copy.landOn }}
         onStateChange={({ to }) => setState(to)}
         onLand={onLand}
       />
-      <Page geist={ref} />
+      {/* Remounted per sister, so mascot-made changes ("Claimed.") reset with her copy. */}
+      <Page key={character} geist={ref} copy={copy} character={character} onCharacter={selectCharacter} />
 
       {!panelOpen && (
         <button
@@ -303,7 +340,7 @@ export function App(): JSX.Element {
               title="Text for her speech bubble"
             />
             <button type="submit" title="Make her say the text – say(text)">
-              Annoy her
+              {copy.sayButton}
             </button>
           </form>
 
@@ -331,6 +368,7 @@ export function App(): JSX.Element {
 
           <fieldset className="panel__lab">
             <legend>look</legend>
+            <Select label="character" value={character} options={NAMES} onChange={selectCharacter} />
             <Range label="size" min={48} max={240} step={1} value={size} onChange={setSize} format={(v) => `${v}px`} />
             <Select label="outfit" value={outfit} options={['classic', 'corset']} onChange={setOutfit} />
             <Select label="shoes" value={shoes} options={['boots', 'heels']} onChange={setShoes} />
@@ -440,8 +478,8 @@ export function App(): JSX.Element {
               title="Your own phrases for the selected trigger, one per line. Empty = built-in phrases."
               value={customPhrases[trigger] ?? ''}
               placeholder={
-                DEFAULT_PHRASES[trigger].length
-                  ? `Built-in (one per line):\n${DEFAULT_PHRASES[trigger].join('\n')}`
+                CHARACTERS[character].phrases[trigger].length
+                  ? `Built-in (one per line):\n${CHARACTERS[character].phrases[trigger].join('\n')}`
                   : 'Silent by default. One phrase per line.'
               }
               onChange={(e) => setCustomPhrases((p) => ({ ...p, [trigger]: e.target.value }))}
@@ -560,7 +598,13 @@ function Range(props: {
 }
 
 /** Formats a value as a JavaScript literal (single-quoted strings, inline objects). */
+/** Rendered as-is in the snippet, e.g. an imported value. */
+class Code {
+  constructor(readonly code: string) {}
+}
+
 function literal(value: unknown): string {
+  if (value instanceof Code) return value.code;
   if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
   if (Array.isArray(value)) return `[${value.map(literal).join(', ')}]`;
   if (value && typeof value === 'object') {
@@ -585,7 +629,7 @@ function toJsx(props: Record<string, unknown>): string {
 }
 
 /** Bait for visitors (and a platform for her). Clicking only earns a brief, harmless wiggle. */
-function BaitButton() {
+function BaitButton({ bait }: { bait: PageCopy['bait'] }) {
   const [clicked, setClicked] = useState(false);
   useEffect(() => {
     if (!clicked) return;
@@ -596,10 +640,10 @@ function BaitButton() {
     <button
       type="button"
       className={clicked ? 'btn btn--bait btn--bait-clicked' : 'btn btn--bait'}
-      data-pagegeist-say="I said don't.|Don't you dare."
+      data-pagegeist-say={bait.say}
       onClick={() => setClicked(true)}
     >
-      {clicked ? 'Told you.' : 'Do not click'}
+      {clicked ? bait.clicked : bait.label}
     </button>
   );
 }
@@ -607,7 +651,37 @@ function BaitButton() {
 const DOCS_URL = `${REPO_URL}/blob/main/docs`;
 
 /** Every button does something: links into the docs, or a reaction from her. */
-function Page({ geist }: { geist: RefObject<PagegeistHandle | null> }) {
+/** The big sister switch in the hero: a pair of toggle buttons, mirrored by the panel select. */
+function SisterSwitch({ value, onChange }: { value: CharacterName; onChange: (name: CharacterName) => void }) {
+  return (
+    <fieldset className="sisters">
+      <legend className="sisters__label">Pick a sister</legend>
+      {NAMES.map((name) => (
+        <button
+          key={name}
+          type="button"
+          className="sisters__option"
+          aria-pressed={value === name}
+          onClick={() => onChange(name)}
+        >
+          <span aria-hidden="true">{COPY[name].glyph}</span> {COPY[name].label}
+        </button>
+      ))}
+    </fieldset>
+  );
+}
+
+function Page({
+  geist,
+  copy,
+  character,
+  onCharacter,
+}: {
+  geist: RefObject<PagegeistHandle | null>;
+  copy: PageCopy;
+  character: CharacterName;
+  onCharacter: (name: CharacterName) => void;
+}) {
   const say = (text: string) => geist.current?.say(text);
   const summon = (text: string) => {
     geist.current?.respawn();
@@ -631,14 +705,11 @@ function Page({ geist }: { geist: RefObject<PagegeistHandle | null> }) {
       </nav>
 
       <header className="hero">
-        <p className="hero__eyebrow">Interactive 2.5D demo</p>
-        <h1>She lives here now.</h1>
-        <p className="hero__sub">You're just visiting.</p>
-        <p className="hero__lead">
-          Pagegeist is the poltergeist of this page. She stomps across headings, sits on your buttons, hangs from edges
-          and shimmies along lines of text like she owns them. Click her or drag her around if you must – she'll
-          complain, but the page stays fully usable.
-        </p>
+        <p className="hero__eyebrow">{copy.eyebrow}</p>
+        <h1>{copy.title}</h1>
+        <p className="hero__sub">{copy.sub}</p>
+        <SisterSwitch value={character} onChange={onCharacter} />
+        <p className="hero__lead">{copy.lead}</p>
         <div className="hero__actions">
           <a className="btn btn--primary" href={`${REPO_URL}#install`}>
             Get started
@@ -646,7 +717,7 @@ function Page({ geist }: { geist: RefObject<PagegeistHandle | null> }) {
           <a className="btn" href="#how-it-works">
             How she works
           </a>
-          <BaitButton />
+          <BaitButton bait={copy.bait} />
         </div>
       </header>
 
@@ -654,34 +725,39 @@ function Page({ geist }: { geist: RefObject<PagegeistHandle | null> }) {
         <section className="section" id="how-it-works">
           <h2>How it works</h2>
           <p>
-            A transparent canvas covers the whole page and ignores pointer events. Only a small invisible hitbox follows
-            the mascot and catches clicks. Headings, paragraphs, buttons and cards are measured with{' '}
-            <code>getBoundingClientRect()</code> and turned into walkable edges – paragraphs even line by line.
+            One transparent canvas lies over the whole page and lets every click through. Only a tiny invisible hitbox
+            follows her around, so you can poke her and nothing else breaks. Headings, paragraphs, buttons and cards are
+            measured with <code>getBoundingClientRect()</code> and become her floor – paragraphs even line by line.
           </p>
           <p>
-            A small state machine decides what happens next: wander around, jump to a neighboring element, sit down,
-            lower herself over an edge or just watch the cursor.
+            A small state machine picks what's next: stroll, jump to the next element, sit down, dangle off an edge – or
+            just stare at your cursor until you feel watched.
           </p>
         </section>
 
         <section className="cards">
           <article className="card">
             <h2>Platforms</h2>
-            <p>Every card's top edge is a one-way platform. She jumps through from below and lands from above.</p>
+            <p>
+              Every card's top edge is a one-way platform: she jumps up through it and lands on top. Like a cat, minus
+              the hair on your keyboard.
+            </p>
             <a className="btn btn--small" href={`${DOCS_URL}/guide.md#platforms`}>
               Details
             </a>
           </article>
           <article className="card">
             <h2>Edges</h2>
-            <p>Too high to jump? She grabs the edge, hangs for a moment and pulls herself up.</p>
+            <p>Too high to jump? She grabs the edge, hangs there for a dramatic moment and pulls herself up.</p>
             <a className="btn btn--small" href={`${DOCS_URL}/guide.md#what-she-does`}>
               Details
             </a>
           </article>
           <article className="card">
             <h2>Depth</h2>
-            <p>Shadows and sorted body layers create spatial depth on a flat canvas.</p>
+            <p>
+              Contact shadows and depth-sorted limbs fake a third dimension, so she sits on your cards, not in them.
+            </p>
             <a className="btn btn--small" href={`${DOCS_URL}/character.md`}>
               Details
             </a>
@@ -692,55 +768,52 @@ function Page({ geist }: { geist: RefObject<PagegeistHandle | null> }) {
           <div>
             <h2>Step by step</h2>
             <p>
-              Heel strike, roll over the toe, push off: her stilettos stay planted while she walks, and she slows down
-              before she arrives.
+              Heel strike, roll over the toe, push off: her boots stay planted on every step, and she brakes before she
+              arrives. No moonwalking on our watch. Press the buttons to send her up the stairs.
             </p>
           </div>
           <div className="button-stack">
-            <button type="button" className="btn" onClick={() => say('One step at a time. Mine.')}>
+            <button type="button" className="btn" onClick={() => say(copy.steps[0])}>
               First step
             </button>
-            <button type="button" className="btn" onClick={() => say("Higher. I'm not carrying you.")}>
+            <button type="button" className="btn" onClick={() => say(copy.steps[1])}>
               Second step
             </button>
-            <button type="button" className="btn btn--primary" onClick={() => summon('Fine. I am coming.')}>
+            <button type="button" className="btn btn--primary" onClick={() => summon(copy.steps[2])}>
               Top
             </button>
           </div>
         </section>
 
         <section className="section">
-          <h2>Scrolling allowed</h2>
+          <h2>Scroll all you like</h2>
           <p>
-            Physics and platforms live in page coordinates. While you scroll she stays on her element; if she leaves the
-            screen she drops back in from the top after a moment. She never stands under the sticky navigation.
+            Physics and platforms live in page coordinates, so scrolling never knocks her off. Scroll her out of sight
+            and she drops back in from the top a moment later. She never stands under the sticky navigation either – she
+            has standards.
           </p>
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus
-            posuere velit aliquet. Cras mattis consectetur purus sit amet fermentum. Vestibulum id ligula porta felis
-            euismod semper. Nullam quis risus eget urna mollis ornare vel eu leo.
-          </p>
-          <p>
-            Donec ullamcorper nulla non metus auctor fringilla. Maecenas sed diam eget risus varius blandit sit amet non
-            magna. Aenean lacinia bibendum nulla sed consectetur.
+            This paragraph is mostly here to be walked on. Every line of text is a ledge: she can stroll along it, sit
+            on its edge or shimmy hand over hand from one end to the other. Long paragraphs make excellent balance
+            beams. This one is doing its best.
           </p>
         </section>
 
         <section className="cards cards--two">
-          <article className="card card--tall" data-pagegeist-say="I'm sitting here now.|This card is mine.">
+          <article className="card card--tall" data-pagegeist-say={copy.cardSay}>
             <h2>Say something</h2>
             <p>
-              Elements can carry their own lines: <code>data-pagegeist-say="This card is mine."</code>. Phrases are
-              always rendered as plain text, never as HTML.
+              Any element can bring its own lines: <code>data-pagegeist-say="This card is mine."</code> – she says them
+              when she lands or sits there. Always plain text, never HTML: no ghost in the markup.
             </p>
           </article>
           <article className="card">
             <h2>Events</h2>
             <p>
-              When she lands on an element it fires <code>pagegeist:land</code> – and <code>onLand</code> – for little
-              easter eggs.
+              Every landing fires <code>pagegeist:land</code> and <code>onLand</code> – handy for small easter eggs.
+              This page uses it to let her claim buttons. Summon her and watch.
             </p>
-            <button type="button" className="btn btn--small" onClick={() => summon('Watch me land.')}>
+            <button type="button" className="btn btn--small" onClick={() => summon(copy.landDemo)}>
               Try it
             </button>
           </article>
@@ -748,8 +821,8 @@ function Page({ geist }: { geist: RefObject<PagegeistHandle | null> }) {
       </main>
 
       <footer className="footer">
-        <p>Hollow House · Playground for the Pagegeist website mascot</p>
-        <p className="footer__note">No ghosts were harmed. Several cursors were.</p>
+        <p>Hollow House · the haunted demo page of Pagegeist</p>
+        <p className="footer__note">{copy.footerNote}</p>
       </footer>
     </>
   );

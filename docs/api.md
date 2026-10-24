@@ -74,7 +74,8 @@ The handle object is stable for the component's lifetime.
 ## Options
 
 All options are optional. Everything except `container`, `size` and `random` can be changed
-at runtime via `update()` or React props – including her wardrobe (`outfit`, `shoes`, `fishnets`).
+at runtime via `update()` or React props – including the character and her wardrobe
+(`character`, `outfit`, `shoes`, `fishnets`).
 
 ### General
 
@@ -85,11 +86,12 @@ at runtime via `update()` or React props – including her wardrobe (`outfit`, `
 | `zIndex` | `number` | `9999` | z-index of the canvas; the hitbox uses `+1`, the pause control `+2`. Rounded to an integer; non-finite values fall back to `9999`. |
 | `spawn` | `'random' \| 'left' \| 'center' \| 'right' \| number` | `'random'` | Horizontal start position; a number is a fraction of the viewport width (0..1). |
 | `paused` | `boolean` | `false` | Start paused / pause & resume declaratively. |
+| `character` | `PagegeistCharacter` | `goth` | Who haunts the page: `goth` (from `@d4ndel1on/pagegeist`) or her little sister `sunny` (from `@d4ndel1on/pagegeist/sunny`) – same black hair and hand-me-down clothes, bleached ghostly white, opposite mood. Changes her colors, speech bubble, pause button, built-in phrases, the `'auto'` outline and her temper: `sunny` notices the cursor from further away, hurries over to it and takes shorter breaks (needs `watchCursor` and `walk`). See [The character](character.md#her-little-sister-sunny). |
 | `outfit` | `'classic' \| 'corset'` (`OutfitStyle`) | `'classic'` | Clothing style. `'classic'`: velvet top with bell sleeves, corset and a long layered skirt. `'corset'`: sleeveless corset top with spaghetti straps and front lacing, short ruffled two-layer miniskirt, a thigh band with a red bow and a red drop pendant on the choker. See [The character](character.md#wardrobe). |
 | `shoes` | `'boots' \| 'heels'` (`ShoeStyle`) | `'boots'` | Footwear: knee-high stiletto boots or black high-top lace-up platform boots (padded collar above the ankle, silver eyelets and front lacing, round toe on a lug-sole platform, tall chunky block heel). Both share the same foot geometry, so the gait is identical. |
 | `fishnets` | `boolean` | `false` | Diamond-mesh fishnet tights. With boots they only show above the shaft. |
-| `outline` | `'auto' \| 'always' \| 'never'` | `'auto'` | Light rim around her dark outfit. `'auto'` enables it when the background behind her is dark. (Independent of this option, her ground and wall shadows are only drawn on dark backgrounds.) |
-| `outlineColor` | CSS color | `'rgba(220, 205, 255, 0.32)'` | Color of the rim. |
+| `outline` | `'auto' \| 'always' \| 'never'` | `'auto'` | Rim around her. `'auto'` enables it where she would blend in: on dark backgrounds for `goth`; on both for `sunny` (a ghostly glow on dark backgrounds for her black hair, a blue-grey rim on light ones). (Independent of this option, her ground and wall shadows are only drawn on dark backgrounds.) |
+| `outlineColor` | CSS color | the character's | Color of the rim. `goth`: `'rgba(220, 205, 255, 0.32)'`, `sunny`: `'rgba(205, 220, 255, 0.4)'` on dark and `'rgba(70, 85, 130, 0.35)'` on light backgrounds. |
 | `debug` | `boolean` | `false` | Draws platforms, safe area, hitbox, her current plan and a trace of her ankle positions (near foot cyan, far foot pink) – planted feet pile up on one spot, so sliding is easy to see. |
 | `respawnAfter` | `number` | `1.5` | Seconds off-screen before she falls back into view. Clamped to ≥ 0; non-finite values fall back to `1.5`. |
 | `timeScale` | `number` | `1` | Simulation speed multiplier – slow motion for debugging and demos (e.g. `0.25`). Walking, physics, blinking and breathing slow down uniformly; rendering stays at full frame rate. Clamped to 0.05–4. |

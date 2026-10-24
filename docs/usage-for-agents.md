@@ -30,8 +30,20 @@ npm install @d4ndel1on/pagegeist
 |---|---|---|
 | React, Next.js, Remix, React Router | `@d4ndel1on/pagegeist/react` | `<Pagegeist />` component (or `usePagegeist()`) |
 | Anything else (vanilla, Vite, Vue, Svelte, Angular, Astro script) | `@d4ndel1on/pagegeist` | `createPagegeist(options)` → instance with `destroy()` |
+| Optional: her friendly little sister in white | `@d4ndel1on/pagegeist/sunny` | `sunny`, passed as `character={sunny}` / `{ character: sunny }` |
 
-Both entries are ESM-only and fully typed. Every option is optional; the defaults are good.
+All entries are ESM-only and fully typed. Every option is optional; the defaults are good.
+
+## Pick a sister
+
+Choose by the tone of the site; ask the user if it is unclear. Both share all other options.
+
+- **`goth`** (default, nothing to import): dark or edgy sites, portfolios, Halloween.
+  Bratty and bossy.
+- **`sunny`**: light, friendly or product sites. Same figure, white dress, bubbly and
+  attention-seeking. Add `import { sunny } from '@d4ndel1on/pagegeist/sunny'` and pass
+  `character={sunny}` (React) or `{ character: sunny }` (vanilla). Plain data, so a Next.js
+  server component layout can pass it too.
 
 ## Copy-paste setups
 
@@ -221,6 +233,7 @@ export function Haunted() {
 <Pagegeist
   pauseControl
   size={96}                                      // standing height in px (default 112)
+  character={sunny}                              // goth (default) | sunny from '@d4ndel1on/pagegeist/sunny'
   outfit="corset"                                // 'classic' (default) | 'corset'
   shoes="heels"                                  // 'boots' (default) | 'heels'
   fishnets

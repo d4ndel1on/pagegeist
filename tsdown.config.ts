@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     react: 'src/react/index.ts',
+    sunny: 'src/sunny.ts',
   },
   format: 'esm',
   platform: 'browser',

@@ -49,6 +49,7 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@d4ndel1on/pagegeist/react', replacement: src('./src/react/index.ts') },
+      { find: '@d4ndel1on/pagegeist/sunny', replacement: src('./src/sunny.ts') },
       { find: '@d4ndel1on/pagegeist', replacement: src('./src/index.ts') },
     ],
   },

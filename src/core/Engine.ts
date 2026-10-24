@@ -385,8 +385,9 @@ export class Engine implements PagegeistInstance {
   }
 
   private applyStyles(): void {
-    const { outfit, shoes, fishnets } = this.options;
+    const { outfit, shoes, fishnets, character } = this.options;
     this.renderer.look = { outfit, shoes, fishnets };
+    this.renderer.palette = character.palette;
     const z = this.options.zIndex;
     this.canvas.style.zIndex = String(z);
     const interactive = !this._paused && (this.options.behaviors.drag || this.options.behaviors.poke);
@@ -412,10 +413,7 @@ export class Engine implements PagegeistInstance {
       Object.assign(button.style, {
         position: 'fixed',
         padding: '6px 10px',
-        border: '1px solid rgba(190, 150, 255, 0.55)',
         borderRadius: '999px',
-        background: 'rgba(18, 13, 24, 0.88)',
-        color: '#f2ecff',
         font: '600 12px system-ui, sans-serif',
         cursor: 'pointer',
       } satisfies Partial<CSSStyleDeclaration>);
@@ -423,6 +421,7 @@ export class Engine implements PagegeistInstance {
       this.pauseButton = button;
     }
     const button = this.pauseButton;
+    const [fill, stroke, text] = this.options.character.bubble;
     const [vertical, horizontal] = config.position.split('-') as ['top' | 'bottom', 'left' | 'right'];
     Object.assign(button.style, {
       top: vertical === 'top' ? '12px' : '',
@@ -430,6 +429,9 @@ export class Engine implements PagegeistInstance {
       left: horizontal === 'left' ? '12px' : '',
       right: horizontal === 'right' ? '12px' : '',
       zIndex: String(this.options.zIndex + 2),
+      border: `1px solid ${stroke}`,
+      background: fill,
+      color: text,
     } satisfies Partial<CSSStyleDeclaration>);
     // The label names the action (no aria-pressed: that would announce the state twice);
     // the glyph is decorative.
@@ -671,9 +673,13 @@ export class Engine implements PagegeistInstance {
     }
   }
 
-  private outlineActive(): boolean {
-    const mode = this.options.outline;
-    return mode === 'always' || (mode === 'auto' && this.darkBackground);
+  /** Color of the outline for the current background, or null for none. */
+  private outlineColor(): string | null {
+    const { outline, outlineColor, character } = this.options;
+    const [dark, light] = character.outline;
+    const auto = this.darkBackground ? dark : light;
+    if (outline === 'never' || (outline === 'auto' && !auto)) return null;
+    return outlineColor || auto || dark || light;
   }
 
   private render(): void {
@@ -713,13 +719,15 @@ export class Engine implements PagegeistInstance {
       const bubble = m.bubble;
       const age = m.time - bubble.born;
       const alpha = Math.min(1, age * 6, (bubble.until - m.time) * 4);
-      this.queue.push(Z.bubble, (c) => drawSpeechBubble(c, x + b.x + b.width / 2, y + b.y, bubble.text, alpha));
+      const colors = this.options.character.bubble;
+      this.queue.push(Z.bubble, (c) => drawSpeechBubble(c, x + b.x + b.width / 2, y + b.y, bubble.text, alpha, colors));
     }
     if (this.options.debug) this.queue.push(Z.debug, (c) => this.drawDebug(c, sx, sy, x, y, b));
 
     this.queue.sort();
     this.queue.drain(ctx, Z.mascot);
-    if (this.outlineActive()) this.drawOutlined(ctx, x + b.x, y + b.y, b.width, b.height);
+    const outline = this.outlineColor();
+    if (outline) this.drawOutlined(ctx, x + b.x, y + b.y, b.width, b.height, outline);
     this.queue.drain(ctx);
   }
 
@@ -727,7 +735,14 @@ export class Engine implements PagegeistInstance {
    * Draws the character layer into an offscreen canvas and composites it with a light
    * rim (8 offset copies of a tinted silhouette) – keeps the dark outfit visible on dark pages.
    */
-  private drawOutlined(ctx: CanvasRenderingContext2D, bx: number, by: number, bw: number, bh: number): void {
+  private drawOutlined(
+    ctx: CanvasRenderingContext2D,
+    bx: number,
+    by: number,
+    bw: number,
+    bh: number,
+    color: string,
+  ): void {
     const margin = 24 * (this.renderer.metrics.height / DEFAULT_SIZE);
     const dpr = this.dpr;
     const left = Math.floor((bx - margin) * dpr);
@@ -758,7 +773,7 @@ export class Engine implements PagegeistInstance {
     tc.globalCompositeOperation = 'copy';
     tc.drawImage(main, 0, 0, w, h, 0, 0, w, h);
     tc.globalCompositeOperation = 'source-in';
-    tc.fillStyle = this.options.outlineColor;
+    tc.fillStyle = color;
     tc.fillRect(0, 0, w, h);
     tc.globalCompositeOperation = 'source-over';
 

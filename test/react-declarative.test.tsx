@@ -1,12 +1,13 @@
 import { act, render } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { seeded } from '../src';
+import { goth, seeded } from '../src';
 import {
   type OutfitStyle,
   type OutlineMode,
   Pagegeist,
   type PagegeistCallbacks,
+  type PagegeistCharacter,
   type PagegeistHandle,
   type PagegeistProps,
   type PauseControlOptions,
@@ -15,10 +16,12 @@ import {
   type TextLineMode,
   type Vec2,
 } from '../src/react';
+import { sunny } from '../src/sunny';
 
 // Compile-time check: the React entry re-exports all public core types.
 type ReExported = [
   PagegeistCallbacks,
+  PagegeistCharacter,
   OutfitStyle,
   OutlineMode,
   PauseControlOptions,
@@ -63,6 +66,16 @@ describe('<Pagegeist /> declarative props', () => {
     expect(applied?.debug).toBe(false);
     expect(applied?.pauseControl).toBe(false);
     expect(applied?.behaviors?.walk).toBe(true);
+  });
+
+  it('switches the character without recreating and restores goth when removed', () => {
+    const { ref, instance, rerender, update } = setup({ character: sunny, outlineColor: 'red' });
+    rerender({ character: sunny, outlineColor: 'red' });
+    expect(update).not.toHaveBeenCalled();
+    rerender({});
+    expect(ref.current?.instance).toBe(instance);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update.mock.calls[0]?.[0]).toMatchObject({ character: goth, outlineColor: '' });
   });
 
   it('stops calling a removed callback', () => {

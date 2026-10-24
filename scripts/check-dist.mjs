@@ -49,7 +49,7 @@ for (const file of readdirSync(dist).filter((f) => f.endsWith('.js') || f.endsWi
 
 if (maps === 0) errors.push('no source maps emitted (tsdown `sourcemap` must stay enabled)');
 
-for (const entry of ['index.js', 'react.js']) {
+for (const entry of ['index.js', 'react.js', 'sunny.js']) {
   try {
     await import(pathToFileURL(join(dist, entry)).href);
   } catch (error) {

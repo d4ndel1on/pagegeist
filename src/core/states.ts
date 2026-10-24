@@ -31,7 +31,7 @@ const IDLE: S = {
     m.body.vel = { x: 0, y: 0 };
     m.plan = null;
     m.jump = null;
-    m.idleUntil = m.rng.range(1.2, 3.5) * (m.motion === 'calm' ? 2.5 : 1);
+    m.idleUntil = m.rng.range(1.2, 3.5) * (m.motion === 'calm' ? 2.5 : 1) * m.temper.patience;
   },
   update(m, dt) {
     if (!requireGround(m)) return;
@@ -43,7 +43,7 @@ const IDLE: S = {
       m.plan = plan;
       m.fsm.transition(MascotState.WALK);
     } else {
-      m.idleUntil = m.fsm.time + m.rng.range(1, 2.5);
+      m.idleUntil = m.fsm.time + m.rng.range(1, 2.5) * m.temper.patience;
     }
   },
 };
@@ -58,7 +58,7 @@ const WALK: S = {
       return;
     }
     const target = clamp(plan.walkToX, p.left + 3, p.right - 3);
-    if (!m.walkToward(target, dt)) return;
+    if (!m.walkToward(target, dt, plan.pace)) return;
 
     const next = plan.next;
     switch (next.type) {
