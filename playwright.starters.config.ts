@@ -24,7 +24,7 @@ export default defineConfig({
   use: { ...devices['Desktop Chrome'], trace: 'retain-on-failure' },
   webServer: [
     starter('next', 'npx next start', 3100),
-    // The starter's own dev script (Webpack, so it also runs on StackBlitz); `next build` covers Turbopack.
+    // The starter's own dev script, exactly as people run it.
     starter('next', 'npm run dev --', 3101),
     starter('vite', 'npx vite preview --strictPort', 3200),
     starter('vite', 'npx vite --strictPort', 3201),

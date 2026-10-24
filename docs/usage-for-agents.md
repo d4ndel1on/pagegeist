@@ -40,8 +40,11 @@ apps built from them – also tested in CI against the packed package, in produc
 mode – live in [`examples/starters/`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters):
 [`next`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters/next) (App Router),
 [`react`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters/react) (Vite + React, StrictMode) and
-[`vite`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters/vite) (vanilla). Each opens on
-StackBlitz via `https://stackblitz.com/github/d4ndel1on/pagegeist/tree/main/examples/starters/<name>`.
+[`vite`](https://github.com/d4ndel1on/pagegeist/tree/main/examples/starters/vite) (vanilla). The React and Vite
+starters open on StackBlitz via
+`https://stackblitz.com/github/d4ndel1on/pagegeist/tree/main/examples/starters/<react|vite>`; current
+Next.js versions do not run there (StackBlitz loses `AsyncLocalStorage` across `await`), so run
+the Next.js starter locally.
 
 ### React
 

@@ -2,7 +2,7 @@
   "name": "pagegeist-starter-next",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
@@ -17,8 +17,5 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "typescript": "7.0.2"
-  },
-  "stackblitz": {
-    "startCommand": "npm run dev"
   }
 }
