@@ -122,7 +122,7 @@ pagegeist.say('Oh. You again.');
 ```
 
 Without a bundler, import a pinned version from a CDN inside `<script type="module">`:
-`import { createPagegeist } from 'https://esm.sh/@d4ndel1on/pagegeist@0.1.2';`
+`import { createPagegeist } from 'https://esm.sh/@d4ndel1on/pagegeist@0.1.3';`
 
 ### Vanilla core inside React
 
