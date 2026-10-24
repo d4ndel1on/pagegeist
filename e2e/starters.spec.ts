@@ -6,7 +6,7 @@ import { expect, test } from '@playwright/test';
 
 const STARTERS = [
   { name: 'Next.js App Router (production)', url: 'http://localhost:3100/', ssr: true },
-  { name: 'Next.js App Router (dev)', url: 'http://localhost:3101/', ssr: true },
+  { name: 'Next.js App Router (dev, Webpack)', url: 'http://localhost:3101/', ssr: true },
   { name: 'Vite (production)', url: 'http://localhost:3200/' },
   { name: 'Vite (dev, HMR client)', url: 'http://localhost:3201/' },
   { name: 'React + Vite (production)', url: 'http://localhost:3300/' },
