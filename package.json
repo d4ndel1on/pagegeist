@@ -1,6 +1,6 @@
 {
   "name": "@d4ndel1on/pagegeist",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "A bratty gothic poltergeist (or her friendly little sister in white) that haunts your web page: she walks on your headings, sits on your buttons, hangs from edges and climbs your text – mostly to annoy you. Zero dependencies, React adapter included.",
   "keywords": [
     "mascot",
